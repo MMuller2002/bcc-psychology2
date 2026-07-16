@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 1 Lesson 2 Quiz — LTP & Memory Consolidation</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #F4F7FB; color: #0D1B3E; line-height: 1.6; font-size: 15px; padding: 20px; max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 700; color: #0D1B3E; margin: 0 0 4px; }
+  .subtitle { font-size: 13px; color: #6B7280; margin: 0 0 18px; }
+  .score-bar { background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+  .score-bar .icon { font-size: 24px; }
+  .score-bar .label { font-size: 13px; font-weight: 700; color: #1E3A8A; margin: 0 0 2px; }
+  .score-bar .hint { font-size: 12px; color: #6B7280; margin: 0; }
+  .card { background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }
+  .q-meta { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #9CA3AF; margin: 0 0 8px; }
+  .q-text { font-size: 15px; font-weight: 700; color: #0D1B3E; margin: 0 0 14px; line-height: 1.5; }
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .opt { font-size: 13px; color: #374151; padding: 10px 14px; border: 1.5px solid #E5E7EB; border-radius: 8px; cursor: pointer; background: #fff; text-align: left; width: 100%; font-family: inherit; line-height: 1.5; transition: background .12s, border-color .12s; }
+  .opt:hover:not(:disabled) { background: #F9FAFB; border-color: #D1D5DB; }
+  .opt:disabled { cursor: default; }
+  .opt.correct { background: #F0FDF4; border-color: #4ADE80; color: #166534; font-weight: 600; }
+  .opt.wrong   { background: #FEF2F2; border-color: #FCA5A5; color: #991B1B; }
+  .opt.reveal  { background: #F0FDF4; border-color: #4ADE80; color: #166534; }
+  .explanation { display: none; margin-top: 12px; font-size: 13px; color: #374151; background: #F9FAFB; border-left: 3px solid #10B981; padding: 10px 14px; border-radius: 0 8px 8px 0; line-height: 1.65; }
+  .explanation.show { display: block; }
+  .result-bar { background: #0D1B3E; border-radius: 12px; padding: 18px 20px; margin-top: 8px; }
+  .result-bar h2 { font-size: 16px; color: #FBBF24; margin: 0 0 8px; }
+  .result-bar p { font-size: 13px; color: rgba(255,255,255,.85); margin: 4px 0; line-height: 1.6; }
+  .result-bar strong { color: #fff; }
+</style>
+</head>
+<body>
+
+<h1>Lesson 2 Quick Quiz</h1>
+<p class="subtitle">LTP and Memory Consolidation &nbsp;&middot;&nbsp; Year 10 Psychology, Unit 3 Week 1 &nbsp;&middot;&nbsp; 8 questions &mdash; aim for 6/8</p>
+
+<div class="score-bar">
+  <span class="icon">&#129504;</span>
+  <div>
+    <p class="label">Score: <span id="score">0</span> / 8</p>
+    <p class="hint">Click any option to reveal the answer and explanation.</p>
+  </div>
+</div>
+
+<div class="card" id="q1">
+  <p class="q-meta">Question 1 of 8 &mdash; LTP mechanism</p>
+  <p class="q-text">When neurons fire together repeatedly, what is the FIRST thing that happens inside the post-synaptic neuron?</p>
+  <div class="options">
+    <button class="opt" onclick="answer(1,0,1)">A. New dendritic spines begin to grow</button>
+    <button class="opt" onclick="answer(1,1,1)">B. Calcium ions flow into the post-synaptic neuron</button>
+    <button class="opt" onclick="answer(1,2,1)">C. The myelin sheath thickens around the axon</button>
+    <button class="opt" onclick="answer(1,3,1)">D. Receptor sites on the pre-synaptic neuron increase</button>
+  </div>
+  <div class="explanation" id="exp1">Repeated activation causes NMDA receptors to open, allowing <strong>calcium influx</strong> into the post-synaptic neuron. This calcium signal then triggers the changes that strengthen the connection. Dendritic spine growth comes later &mdash; it is the structural outcome of LTP, not the trigger.</div>
+</div>
+
+<div class="card" id="q2">
+  <p class="q-meta">Question 2 of 8 &mdash; LTP and Unit 1 link</p>
+  <p class="q-text">Hebb&rsquo;s rule states: &ldquo;neurons that fire together, wire together.&rdquo; Which Unit 1 concept does LTP most directly explain?</p>
+  <div class="options">
+    <button class="opt" onclick="answer(2,0,2)">A. Pruning of unused synaptic connections</button>
+    <button class="opt" onclick="answer(2,1,2)">B. The role of the hippocampus in episodic memory</button>
+    <button class="opt" onclick="answer(2,2,2)">C. Sprouting &mdash; the growth of new dendritic spines</button>
+    <button class="opt" onclick="answer(2,3,2)">D. Myelination of the corpus callosum</button>
+  </div>
+  <div class="explanation" id="exp2">LTP produces <strong>sprouting</strong> &mdash; the structural growth of new dendritic spines that you labelled in Unit 1. LTP is the electrochemical trigger; sprouting is the physical outcome. The two concepts describe the same process at different levels of analysis.</div>
+</div>
+
+<div class="card" id="q3">
+  <p class="q-meta">Question 3 of 8 &mdash; Memory consolidation</p>
+  <p class="q-text">Why are memories described as &ldquo;fragile&rdquo; immediately after learning?</p>
+  <div class="options">
+    <button class="opt" onclick="answer(3,0,2)">A. The hippocampus hasn&rsquo;t yet formed a connection with the cortex</button>
+    <button class="opt" onclick="answer(3,1,2)">B. LTP hasn&rsquo;t occurred yet &mdash; neurons haven&rsquo;t fired together</button>
+    <button class="opt" onclick="answer(3,2,2)">C. The memory exists only as a temporary LTP trace that hasn&rsquo;t been consolidated into stable LTM</button>
+    <button class="opt" onclick="answer(3,3,2)">D. The sensory register hasn&rsquo;t transferred the information to STM</button>
+  </div>
+  <div class="explanation" id="exp3">After learning, the memory exists as a <strong>temporary LTP trace</strong> &mdash; a change in synaptic sensitivity that can be disrupted. Consolidation (which happens primarily during sleep) stabilises this trace into durable LTM. Without consolidation, even well-encoded memories can fade.</div>
+</div>
+
+<div class="card" id="q4">
+  <p class="q-meta">Question 4 of 8 &mdash; Sleep stages</p>
+  <p class="q-text">Which sleep stage is MOST associated with transferring new memories from the hippocampus to the cortex?</p>
+  <div class="options">
+    <button class="opt" onclick="answer(4,0,1)">A. REM sleep</button>
+    <button class="opt" onclick="answer(4,1,1)">B. NREM slow-wave sleep</button>
+    <button class="opt" onclick="answer(4,2,1)">C. Light NREM sleep (Stage 1&ndash;2)</button>
+    <button class="opt" onclick="answer(4,3,1)">D. The hypnagogic state (falling asleep)</button>
+  </div>
+  <div class="explanation" id="exp4">During <strong>NREM slow-wave sleep</strong>, the hippocampus replays newly encoded information and transfers it to the cortex for long-term storage. REM sleep plays a different role &mdash; integrating new memories with existing knowledge networks and consolidating emotional memories.</div>
+</div>
+
+<div class="card" id="q5">
+  <p class="q-meta">Question 5 of 8 &mdash; REM sleep function</p>
+  <p class="q-text">What is the PRIMARY memory function of REM sleep?</p>
+  <div class="options">
+    <button class="opt" onclick="answer(5,0,2)">A. Replaying hippocampal memories and transferring them to the cortex</button>
+    <button class="opt" onclick="answer(5,1,2)">B. Repairing myelin sheaths damaged during the day</button>
+    <button class="opt" onclick="answer(5,2,2)">C. Integrating new memories with existing knowledge networks</button>
+    <button class="opt" onclick="answer(5,3,2)">D. Clearing waste products from the cerebrospinal fluid</button>
+  </div>
+  <div class="explanation" id="exp5">REM sleep is responsible for <strong>integrating new memories with existing knowledge</strong> and consolidating emotional memories involving the amygdala. Hippocampal replay and cortical transfer is primarily a NREM slow-wave function. (Clearing waste products via the glymphatic system is a sleep function, but not a memory-specific one.)</div>
+</div>
+
+<div class="card" id="q6">
+  <p class="q-meta">Question 6 of 8 &mdash; Jamara vs Priya</p>
+  <p class="q-text">Jamara studies for 3 hours then sleeps 5 hours. Priya studies for 2 hours then sleeps 8 hours. Who will likely perform better on a memory test the next day?</p>
+  <div class="options">
+    <button class="opt" onclick="answer(6,0,1)">A. Jamara, because she spent more time studying and encoded more</button>
+    <button class="opt" onclick="answer(6,1,1)">B. Priya, because 8 hours of sleep provides enough NREM cycles for hippocampal consolidation to complete</button>
+    <button class="opt" onclick="answer(6,2,1)">C. They will perform the same, because the total time (study + sleep) is equal</button>
+    <button class="opt" onclick="answer(6,3,1)">D. Jamara, because sleep only helps retention after the first 6 hours</button>
+  </div>
+  <div class="explanation" id="exp6"><strong>Priya</strong> almost certainly performs better. Jamara&rsquo;s 5 hours of sleep is insufficient for complete NREM hippocampal replay &mdash; the fragile LTP traces she formed during study never fully transfer to cortical LTM. Priya&rsquo;s 8 hours provides two full NREM cycles and adequate REM, completing both the transfer and integration stages. More study time doesn&rsquo;t compensate for insufficient consolidation.</div>
+</div>
+
+<div class="card" id="q7">
+  <p class="q-meta">Question 7 of 8 &mdash; Sleep deprivation mechanism</p>
+  <p class="q-text">Sleep deprivation impairs memory primarily by disrupting which process?</p>
+  <div class="options">
+    <button class="opt" onclick="answer(7,0,2)">A. Encoding &mdash; preventing LTP from forming during learning</button>
+    <button class="opt" onclick="answer(7,1,2)">B. Retrieval &mdash; making it harder to access stored memories</button>
+    <button class="opt" onclick="answer(7,2,2)">C. Consolidation &mdash; preventing fragile LTP traces from stabilising into durable LTM</button>
+    <button class="opt" onclick="answer(7,3,2)">D. Attention &mdash; reducing the amount of information that reaches the sensory register</button>
+  </div>
+  <div class="explanation" id="exp7">Sleep deprivation does <strong>not</strong> prevent LTP during learning &mdash; you can still encode information while sleep-deprived. What it prevents is <strong>consolidation</strong>: the hippocampal replay and cortical transfer that stabilises fragile traces into durable LTM. The knowledge is encoded but not stabilised, so it fades.</div>
+</div>
+
+<div class="card" id="q8">
+  <p class="q-meta">Question 8 of 8 &mdash; Application</p>
+  <p class="q-text">A student studies until 6am and sleeps only 1 hour before their exam. Using today&rsquo;s content, what will happen to their recall &mdash; and why?</p>
+  <div class="options">
+    <button class="opt" onclick="answer(8,0,1)">A. They will recall well, because the information was recently encoded and is still in STM</button>
+    <button class="opt" onclick="answer(8,1,1)">B. They will recall poorly, because they didn&rsquo;t have enough NREM sleep for hippocampal consolidation to complete</button>
+    <button class="opt" onclick="answer(8,2,1)">C. They will recall well, because staying awake keeps LTP active in the hippocampus</button>
+    <button class="opt" onclick="answer(8,3,1)">D. They will recall poorly, because sleep deprivation prevents LTP from forming during study</button>
+  </div>
+  <div class="explanation" id="exp8">The student will likely <strong>recall poorly</strong>. With only 1 hour of sleep, there is virtually no NREM slow-wave sleep &mdash; the hippocampus cannot replay and transfer the newly encoded material to the cortex. The LTP traces formed during all-night studying remain fragile and fade quickly. This is why distributed study with full sleep consistently outperforms massed study with no sleep: it&rsquo;s not how much you study, it&rsquo;s whether your brain gets the consolidation window it needs.</div>
+</div>
+
+<div class="result-bar">
+  <h2>&#127942; Quiz complete &mdash; your score: <span id="score2">0</span> / 8</h2>
+  <p><strong>6&ndash;8 correct:</strong> Strong grasp of LTP and consolidation &mdash; ready for Lesson 3.</p>
+  <p><strong>4&ndash;5 correct:</strong> Review the mechanism steps and check which questions you missed.</p>
+  <p><strong>0&ndash;3 correct:</strong> Re-read your Lesson 2 notes before Lesson 3 begins.</p>
+</div>
+
+<script>
+var score = 0;
+var answered = 0;
+
+function answer(qNum, chosen, correct) {
+  var card = document.getElementById('q' + qNum);
+  var btns = card.querySelectorAll('.opt');
+
+  // Already answered
+  if (btns[0].disabled) return;
+
+  // Disable all buttons
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].disabled = true;
+    if (i === correct) {
+      btns[i].classList.add(chosen === correct ? 'correct' : 'reveal');
+    } else if (i === chosen) {
+      btns[i].classList.add('wrong');
+    }
+  }
+
+  // Show explanation
+  document.getElementById('exp' + qNum).classList.add('show');
+
+  // Update score
+  answered++;
+  if (chosen === correct) score++;
+  document.getElementById('score').textContent = score;
+  document.getElementById('score2').textContent = score;
+}
+</script>
+
+</body>
+</html>
