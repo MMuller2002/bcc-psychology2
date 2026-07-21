@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Psych Quiz Bot — Year 9 Psychology</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy: #1B2A4A; --gold: #C9A84C; --bg: #F7F5F0; --surface: #fff;
+  --border: #E2DDD6; --text: #1A1A1A; --muted: #6B6560; --radius: 12px;
+  --green: #2E7D32; --green-bg: #E8F5EE;
+  --red: #C62828; --red-bg: #FFEBEE;
+  --purple: #5B4FCC; --purple-bg: #EEEDFE;
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ── Header ── */
+header { background: var(--navy); color: white; padding: 1rem 1.5rem; border-bottom: 3px solid var(--gold); }
+.header-inner { max-width: 720px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+.logo { font-size: 28px; }
+.header-text h1 { font-size: 18px; font-weight: 700; }
+.header-text p  { font-size: 12px; opacity: .6; margin-top: 2px; }
+.header-stats { margin-left: auto; display: flex; gap: 14px; align-items: center; }
+.stat { text-align: center; }
+.stat-val { font-size: 20px; font-weight: 700; color: var(--gold); line-height: 1; }
+.stat-label { font-size: 10px; opacity: .6; text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+
+/* ── Main ── */
+main { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+/* ── Name screen ── */
+#name-screen { text-align: center; padding: 2rem 1rem; }
+.name-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2.5rem 2rem; max-width: 420px; margin: 0 auto; }
+.name-card h2 { font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+.name-card p  { font-size: 14px; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.6; }
+.name-input { width: 100%; border: 2px solid var(--border); border-radius: 10px; padding: 12px 16px; font-size: 16px; font-family: inherit; color: var(--text); transition: border-color .15s; margin-bottom: 12px; }
+.name-input:focus { outline: none; border-color: var(--gold); }
+.topic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1.5rem; }
+.topic-btn { background: var(--bg); border: 2px solid var(--border); border-radius: 10px; padding: 10px 14px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all .15s; color: var(--text); text-align: left; }
+.topic-btn:hover { border-color: var(--gold); background: #FDF6E3; }
+.topic-btn.selected { background: var(--navy); border-color: var(--navy); color: white; }
+.topic-btn.all-topics { grid-column: span 2; background: var(--navy); border-color: var(--navy); color: white; }
+.start-btn { width: 100%; background: var(--gold); color: var(--navy); border: none; border-radius: 10px; padding: 14px; font-size: 16px; font-weight: 700; cursor: pointer; transition: opacity .15s; }
+.start-btn:hover { opacity: .9; }
+.start-btn:disabled { opacity: .4; cursor: default; }
+
+/* ── Quiz screen ── */
+#quiz-screen { display: none; }
+.progress-area { margin-bottom: 1.25rem; }
+.progress-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.progress-label { font-size: 13px; color: var(--muted); font-weight: 500; }
+.streak-badge { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; }
+.streak-badge.hot { color: #E65100; }
+.progress-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--gold); border-radius: 4px; transition: width .4s ease; }
+
+.topic-tag { display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; }
+.topic-tag.variables  { background: var(--purple-bg); color: var(--purple); }
+.topic-tag.ethics     { background: var(--red-bg);    color: var(--red);    }
+.topic-tag.research   { background: var(--green-bg);  color: var(--green);  }
+.topic-tag.brain      { background: #FEF3E7;           color: #BF5000;       }
+
+.question-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1rem; }
+.q-header { background: var(--navy); padding: 1rem 1.25rem; color: white; }
+.q-header h3 { font-size: 16px; font-weight: 600; line-height: 1.5; }
+.q-points { font-size: 12px; opacity: .65; margin-top: 4px; }
+.q-body { padding: 1.25rem; }
+
+.answer-input { width: 100%; border: 2px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 15px; font-family: inherit; color: var(--text); transition: border-color .15s; resize: none; }
+.answer-input:focus { outline: none; border-color: var(--gold); }
+.answer-input.correct-border { border-color: var(--green); }
+.answer-input.wrong-border   { border-color: var(--red); }
+
+.submit-row { display: flex; gap: 8px; margin-top: 12px; }
+.submit-btn { flex: 1; background: var(--navy); color: white; border: none; border-radius: 10px; padding: 12px; font-size: 15px; font-weight: 600; cursor: pointer; transition: opacity .15s; }
+.submit-btn:hover:not(:disabled) { opacity: .85; }
+.submit-btn:disabled { opacity: .4; cursor: default; }
+.hint-btn { background: none; border: 2px solid var(--border); border-radius: 10px; padding: 12px 16px; font-size: 14px; color: var(--muted); cursor: pointer; transition: all .15s; white-space: nowrap; }
+.hint-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--text); }
+.hint-btn:disabled { opacity: .35; cursor: default; }
+
+.hint-box { margin-top: 10px; background: #FDF6E3; border: 1px solid var(--gold); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: #5C4A1E; line-height: 1.55; display: none; }
+.hint-box.show { display: block; }
+.hint-level { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--gold); margin-bottom: 4px; }
+
+.feedback-card { border-radius: 10px; padding: 1.1rem 1.25rem; margin-bottom: 1rem; display: none; }
+.feedback-card.show { display: block; }
+.feedback-card.correct { background: var(--green-bg); border: 1px solid var(--green); }
+.feedback-card.wrong   { background: var(--red-bg);   border: 1px solid var(--red);   }
+.feedback-card.partial { background: #FEF3E7;          border: 1px solid #BF5000;      }
+.fb-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.feedback-card.correct .fb-title { color: var(--green); }
+.feedback-card.wrong   .fb-title { color: var(--red);   }
+.feedback-card.partial .fb-title { color: #BF5000;      }
+.fb-body { font-size: 14px; line-height: 1.6; color: var(--text); }
+.fb-answer { margin-top: 8px; font-size: 13px; color: var(--muted); }
+.fb-answer strong { color: var(--text); }
+
+.next-btn { width: 100%; background: var(--gold); color: var(--navy); border: none; border-radius: 10px; padding: 13px; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity .15s; display: none; }
+.next-btn.show { display: block; }
+.next-btn:hover { opacity: .9; }
+
+/* ── Score screen ── */
+#score-screen { display: none; text-align: center; }
+.score-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem 1.5rem; margin-bottom: 1.25rem; }
+.score-big { font-size: 64px; font-weight: 800; color: var(--navy); line-height: 1; }
+.score-out { font-size: 18px; color: var(--muted); margin-bottom: 16px; }
+.score-msg { font-size: 16px; color: var(--text); margin-bottom: 20px; line-height: 1.6; }
+.score-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 1.5rem; }
+.score-stat { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+.score-stat .val { font-size: 24px; font-weight: 700; color: var(--navy); }
+.score-stat .lbl { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.restart-btn { background: var(--navy); color: white; border: none; border-radius: 10px; padding: 13px 28px; font-size: 15px; font-weight: 600; cursor: pointer; margin-right: 10px; }
+.retry-btn   { background: none; border: 2px solid var(--border); border-radius: 10px; padding: 13px 28px; font-size: 15px; cursor: pointer; color: var(--text); }
+
+/* ── Leaderboard ── */
+.leaderboard { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1.25rem; }
+.lb-header { background: var(--navy); color: white; padding: .9rem 1.25rem; display: flex; align-items: center; gap: 8px; }
+.lb-header h3 { font-size: 15px; font-weight: 600; flex:1; }
+.lb-body { padding: 0; }
+.lb-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 14px; }
+.lb-row:last-child { border-bottom: none; }
+.lb-rank { font-size: 16px; width: 28px; text-align: center; flex-shrink: 0; }
+.lb-name { flex: 1; font-weight: 500; }
+.lb-score { font-weight: 700; color: var(--navy); }
+.lb-topic { font-size: 11px; color: var(--muted); }
+.lb-empty { padding: 1.5rem; text-align: center; color: var(--muted); font-size: 14px; }
+
+/* ── Animations ── */
+@keyframes pop { 0%{transform:scale(.8);opacity:0} 60%{transform:scale(1.05)} 100%{transform:scale(1);opacity:1} }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+.pop  { animation: pop  .3s ease both; }
+.shake{ animation: shake .3s ease; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">🧠</div>
+    <div class="header-text">
+      <h1>Psych Quiz Bot</h1>
+      <p>Year 9 Psychology · Lessons 1–5</p>
+    </div>
+    <div class="header-stats" id="header-stats" style="display:none">
+      <div class="stat"><div class="stat-val" id="h-score">0</div><div class="stat-label">Points</div></div>
+      <div class="stat"><div class="stat-val" id="h-streak">0</div><div class="stat-label">Streak 🔥</div></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ══ NAME / TOPIC SCREEN ══════════════════════════════════════════════════ -->
+<div id="name-screen">
+  <div class="name-card">
+    <div style="font-size:48px;margin-bottom:12px">🧠</div>
+    <h2>Welcome to Psych Quiz Bot!</h2>
+    <p>Test your knowledge of Variables, Ethics, and Research Methods. Answer questions, earn points, and climb the leaderboard!</p>
+    <input class="name-input" id="player-name" type="text" placeholder="Enter your name…" maxlength="20" oninput="checkNameReady()">
+    <div style="font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Choose your topic:</div>
+    <div class="topic-grid">
+      <button class="topic-btn" onclick="selectTopic('variables')" id="t-variables">🔬 Variables</button>
+      <button class="topic-btn" onclick="selectTopic('ethics')"    id="t-ethics">⚖️ Ethics</button>
+      <button class="topic-btn" onclick="selectTopic('research')"  id="t-research">🧪 Research Methods</button>
+      <button class="topic-btn" onclick="selectTopic('brain')"     id="t-brain">🧠 Brain Regions</button>
+      <button class="topic-btn all-topics" onclick="selectTopic('all')" id="t-all">⭐ All Topics (Mixed)</button>
+    </div>
+    <button class="start-btn" id="start-btn" onclick="startQuiz()" disabled>Start Quiz →</button>
+  </div>
+
+  <!-- Leaderboard on start screen -->
+  <div style="margin-top:1.5rem">
+    <div class="leaderboard">
+      <div class="lb-header"><h3>🏆 Leaderboard</h3><span style="font-size:12px;opacity:.65">Session scores</span></div>
+      <div class="lb-body" id="lb-body"><div class="lb-empty">No scores yet — be the first!</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ QUIZ SCREEN ══════════════════════════════════════════════════════════ -->
+<div id="quiz-screen">
+  <div class="progress-area">
+    <div class="progress-top">
+      <span class="progress-label" id="q-counter">Question 1 of 10</span>
+      <span class="streak-badge" id="streak-display">🔥 0 streak</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="question-card" id="q-card">
+    <div class="q-header">
+      <div class="topic-tag" id="topic-tag">Variables</div>
+      <h3 id="q-text">Question text here</h3>
+      <div class="q-points" id="q-points">Worth 10 points</div>
+    </div>
+    <div class="q-body">
+      <textarea class="answer-input" id="answer-input" rows="3" placeholder="Type your answer here…" oninput="onAnswerType()"></textarea>
+      <div class="hint-box" id="hint-box"><div class="hint-level" id="hint-level">Hint 1 of 2</div><span id="hint-text"></span></div>
+      <div class="submit-row">
+        <button class="submit-btn" id="submit-btn" onclick="submitAnswer()" disabled>Submit Answer</button>
+        <button class="hint-btn"   id="hint-btn"   onclick="showHint()">💡 Hint</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="feedback-card" id="feedback-card">
+    <div class="fb-title" id="fb-title"></div>
+    <div class="fb-body"  id="fb-body"></div>
+    <div class="fb-answer" id="fb-answer"></div>
+  </div>
+
+  <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next Question →</button>
+</div>
+
+<!-- ══ SCORE SCREEN ═════════════════════════════════════════════════════════ -->
+<div id="score-screen">
+  <div class="score-card">
+    <div class="score-big" id="final-score">0</div>
+    <div class="score-out">points earned</div>
+    <div class="score-msg" id="final-msg"></div>
+    <div class="score-stats">
+      <div class="score-stat"><div class="val" id="fin-correct">0</div><div class="lbl">Correct</div></div>
+      <div class="score-stat"><div class="val" id="fin-streak">0</div><div class="lbl">Best Streak 🔥</div></div>
+      <div class="score-stat"><div class="val" id="fin-hints">0</div><div class="lbl">Hints Used</div></div>
+    </div>
+    <button class="restart-btn" onclick="goToStart()">Play Again</button>
+    <button class="retry-btn"   onclick="retryQuiz()">↺ Retry Same Topic</button>
+  </div>
+
+  <div class="leaderboard">
+    <div class="lb-header"><h3>🏆 Leaderboard</h3></div>
+    <div class="lb-body" id="lb-body-2"><div class="lb-empty">No scores yet.</div></div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ══ QUESTION BANK ═══════════════════════════════════════════════════════════
+const QUESTIONS = {
+  variables: [
+    { q:"What is an independent variable (IV)?", keywords:["change","changed","manipulate","manipulated","factor that is changed","what we change","researcher changes","deliberately"],
+      hints:["Think about what the researcher DOES to the experiment — what do they alter?","The IV is the factor the researcher deliberately _____ to test its effect."],
+      answer:"The independent variable is the factor the researcher deliberately changes or manipulates to test its effect on the outcome.", points:10 },
+    { q:"What is a dependent variable (DV)?", keywords:["measure","measured","outcome","result","recorded","what we measure","depends on"],
+      hints:["Think about what happens AFTER you change the IV — what do you look at?","The DV is the outcome that is _____ in an experiment."],
+      answer:"The dependent variable is the outcome that is measured in an experiment. It 'depends on' what happens with the independent variable.", points:10 },
+    { q:"What are controlled variables, and why are they important?", keywords:["same","constant","fair","unchanged","kept the same","control","equal"],
+      hints:["These are the things you DON'T change — they stay the same for everyone.","Controlled variables make the experiment _____ by keeping everything except the IV the same."],
+      answer:"Controlled variables are factors kept the same for all participants to make the experiment fair. If they changed, it would be impossible to know whether the IV caused any effect.", points:15 },
+    { q:"In the experiment 'Does music affect memory recall?' — what is the independent variable?", keywords:["music","silence","presence of music","music vs silence","whether music"],
+      hints:["What does the researcher change between the two groups?","One group hears music, the other hears _____. That difference is the IV."],
+      answer:"The independent variable is whether participants listen to music or study in silence.", points:10 },
+    { q:"In the experiment 'Does music affect memory recall?' — what is the dependent variable?", keywords:["words recalled","memory recall","number of words","recall score","how many words"],
+      hints:["What is being measured at the END of the experiment?","The researcher counts how many _____ each participant can remember."],
+      answer:"The dependent variable is the number of words recalled from the word list.", points:10 },
+    { q:"Give TWO examples of controlled variables for the music and memory experiment.", keywords:["word list","study time","environment","instructions","room","age","same"],
+      hints:["Think about what needs to be IDENTICAL for all participants to make it fair.","Hint: think about the list of words used, how long they study, and where they study."],
+      answer:"Examples include: same word list for all participants, same study time, same room/environment, same instructions given to all participants.", points:15 },
+    { q:"Why is it important to have only ONE independent variable in an experiment?", keywords:["cause","one","single","know","certain","sure","attribute","isolate","which variable","fair"],
+      hints:["If you changed two things at once, how would you know WHICH one caused the result?","Having only one IV means you can be _____ that any change in the DV was caused by that specific IV."],
+      answer:"Having only one IV means the researcher can be certain that any change in the DV was caused by that variable — not by something else that was also changed.", points:15 },
+    { q:"A researcher tests whether energy drinks improve focus. Name the most likely IV and DV.", keywords:["energy drink","drink","iv","dv","focus","score","performance","whether"],
+      hints:["What is being changed between the two groups? What is being measured at the end?","IV = what participants drink. DV = how _____ they perform on a focus task."],
+      answer:"IV: Whether participants drink an energy drink or water (the drink condition). DV: Performance score on a focus task.", points:15 },
+  ],
+  ethics: [
+    { q:"What is informed consent in psychological research?", keywords:["told","inform","agree","agreement","freely","permission","know","understand","before","voluntarily"],
+      hints:["Think about what participants need to KNOW and DO before the study begins.","Participants must be _____ about the study and freely _____ to take part."],
+      answer:"Informed consent means participants are fully told what the study involves and freely agree to take part before it begins. They must not be pressured or misled.", points:10 },
+    { q:"What does 'minimising harm' mean in psychological research?", keywords:["harm","hurt","distress","protect","physical","psychological","risk","damage","safe","safety"],
+      hints:["Think about the researcher's responsibility toward the people in their study.","The risk to participants must never be greater than what they face in _____ everyday life."],
+      answer:"Minimising harm means protecting participants from physical, psychological, or social harm. The risk must never exceed what people experience in normal everyday life.", points:10 },
+    { q:"What is the 'right to withdraw' in a psychology experiment?", keywords:["leave","stop","quit","any time","withdraw","exit","remove","penalty","consequence","data"],
+      hints:["Think about the participant's freedom during the experiment.","Participants can leave the study at _____ time, without any _____ or punishment."],
+      answer:"The right to withdraw means participants can leave the study at any time without penalty. They can also request their data be removed from the results.", points:10 },
+    { q:"What is the purpose of a debrief in psychological research?", keywords:["after","true purpose","explain","inform","full","support","end","deception","tell","purpose"],
+      hints:["A debrief happens at the END of the study — what does the researcher do?","The researcher explains the _____ purpose of the study and checks that participants are _____."],
+      answer:"A debrief is when the researcher fully informs participants of the true purpose of the study after it is complete — especially if deception was used — and offers support if needed.", points:10 },
+    { q:"Name THREE ethical principles used in psychological research.", keywords:["consent","harm","privacy","debrief","withdraw","confidential"],
+      hints:["There are five core principles — name any three. Think: what protects participants?","Informed _____, minimise _____, protect _____, debrief, right to _____."],
+      answer:"Any three of: informed consent, minimising harm, protecting privacy, debrief, right to withdraw.", points:15 },
+    { q:"What ethical principles did Milgram's obedience study violate?", keywords:["deception","deceived","withdraw","pressure","pressured","harm","consent","distress","misled"],
+      hints:["Participants were told it was a 'learning experiment' — was that the truth?","Milgram _____ participants about the purpose. They were also _____ to continue even when upset."],
+      answer:"Milgram violated: informed consent (participants were deceived about the purpose), minimising harm (participants were visibly distressed), and the right to withdraw (they were pressured to continue).", points:20 },
+    { q:"Why is protecting privacy important in psychological research?", keywords:["confidential","identifiable","anonymous","data","personal","private","stored","secure"],
+      hints:["What could happen if people could identify a participant in published research?","Personal information must be kept _____ so participants cannot be _____ in results."],
+      answer:"Protecting privacy ensures participants' personal data is kept confidential and that they cannot be identified in published results without their permission.", points:10 },
+    { q:"What makes the Tuskegee Syphilis Study an example of a major ethical failure?", keywords:["consent","informed","treatment","denied","withheld","diagnosis","told","harm","40 years"],
+      hints:["Participants were sick — were they told? Were they given the cure when it became available?","Participants were never told their _____ and were _____ treatment even when penicillin became available."],
+      answer:"Participants were never told they had syphilis, never gave informed consent, and were denied effective treatment (penicillin) even after it became available — causing serious, preventable harm over 40 years.", points:20 },
+  ],
+  research: [
+    { q:"What is a hypothesis, and what format should it follow?", keywords:["if","then","because","prediction","format","testable","predict","state"],
+      hints:["A hypothesis is a prediction about what will happen. What three-part format do we use?","If _____, then _____, because _____."],
+      answer:"A hypothesis is a testable prediction about what will happen in an experiment. It follows the format: 'If [IV], then [DV outcome] because [reason].'", points:10 },
+    { q:"What is the difference between a good and a bad research question? Give an example of each.", keywords:["specific","measurable","testable","vague","clear","example","good","bad"],
+      hints:["Think about what makes a question possible to actually TEST in an experiment.","A good question is _____ and _____. A bad question is too _____ to test."],
+      answer:"A good research question is specific and measurable (e.g. 'Does music affect memory recall?'). A bad one is too vague (e.g. 'Do people like music?') — it can't be tested because 'like' isn't measurable.", points:15 },
+    { q:"What are the four main steps in designing a psychology experiment?", keywords:["research question","hypothesis","variables","procedure","identify","plan","steps"],
+      hints:["Think about what comes FIRST (the question), then the prediction, then the variables, then...","1. Formulate a _____ question 2. Develop a _____ 3. Identify _____ 4. Plan the _____."],
+      answer:"1. Formulate a research question 2. Develop a hypothesis 3. Identify variables (IV, DV, CVs) 4. Plan the procedure.", points:15 },
+    { q:"Complete this hypothesis: 'If students use their phone for one hour before bed, then ______.'", keywords:["slower","reaction time","sleep","blue light","melatonin","tired","worse","morning"],
+      hints:["Think about what EFFECT phone use before bed would have on the next morning.","Phone screens emit _____ light, which reduces _____, affecting sleep quality."],
+      answer:"…then their reaction time in the morning will be slower, because blue light from phone screens reduces melatonin production, which disrupts sleep quality and cognitive performance.", points:15 },
+    { q:"Why must a research question be testable?", keywords:["measure","test","experiment","data","evidence","answer","observable","empirical","valid"],
+      hints:["If you can't measure the outcome, can you actually answer the question?","A testable question can be _____ through an experiment, producing _____ evidence."],
+      answer:"A research question must be testable so that it can be answered through an experiment. If the outcome cannot be measured, there is no way to know whether the hypothesis is supported or not.", points:10 },
+    { q:"What is the 'because' part of a hypothesis for?", keywords:["reason","explain","justify","prior","knowledge","why","reasoning","theory","evidence"],
+      hints:["The 'because' shows your thinking — it's not just a guess.","The 'because' explains _____ you think the IV will affect the DV, based on prior knowledge or theory."],
+      answer:"The 'because' part provides the reasoning behind your prediction, showing it is based on prior knowledge or theory — not just a guess.", points:10 },
+    { q:"Name TWO things a good procedure should include.", keywords:["participants","steps","replicate","repeat","sample","measure","instruction","record","how many"],
+      hints:["Think about what information someone else would need to RUN the same experiment.","A procedure should include the number of _____, the steps taken, and how the DV will be _____."],
+      answer:"A good procedure includes: the number and type of participants, the step-by-step process of the experiment, and how the DV will be measured and recorded.", points:15 },
+    { q:"What is meant by 'replication' in psychological research, and why does it matter?", keywords:["repeat","same","again","replicate","confirm","reliable","consistent","reproduce","trust"],
+      hints:["What happens when other researchers run the same experiment and get the same results?","Replication means other researchers can _____ the experiment. If results are _____, the findings are more reliable."],
+      answer:"Replication means another researcher can run the same experiment and get the same results. It matters because consistent results across multiple studies make findings more reliable and trustworthy.", points:15 },
+  ],
+  brain: [
+    { q:"What is the main function of the frontal lobe?", keywords:["decision","planning","personality","impulse","control","thinking","voluntary","movement","prefrontal"],
+      hints:["It's called the 'CEO' of the brain — what does a CEO do?","The frontal lobe handles decision-making, _____, personality, and impulse _____."],
+      answer:"The frontal lobe handles decision-making, planning, personality, impulse control, and voluntary movement. The prefrontal cortex (part of the frontal lobe) is responsible for complex thinking and self-control.", points:10 },
+    { q:"What does the amygdala do?", keywords:["fear","emotion","fight","flight","threat","alarm","anger","stress","response"],
+      hints:["Think about what happens in your body when you feel scared or threatened.","The amygdala is the brain's _____ system — it triggers the fight-or-_____ response."],
+      answer:"The amygdala processes fear, anger, and pleasure, and triggers the fight-or-flight response when a threat is detected. It reacts before the conscious brain registers the danger.", points:10 },
+    { q:"What is the hippocampus responsible for?", keywords:["memory","long-term","short-term","spatial","navigation","convert","seahorse","learning","consolidat"],
+      hints:["It's named after the Greek word for seahorse. What kind of memory does it handle?","The hippocampus converts ___-term memories into ___-term memories."],
+      answer:"The hippocampus is responsible for converting short-term memories into long-term memories and for spatial navigation. Damage here causes severe memory loss.", points:10 },
+    { q:"What does the occipital lobe process?", keywords:["vision","visual","see","colour","shape","object","recognition","sight","motion"],
+      hints:["It's at the back of the brain. Think about what information comes in through your eyes.","The occipital lobe is entirely dedicated to processing _____ information."],
+      answer:"The occipital lobe is entirely dedicated to processing visual information — colour, shape, motion, and object recognition.", points:10 },
+    { q:"What is the function of the brainstem?", keywords:["breathing","heart rate","automatic","autonomic","blood pressure","sleep","reflex","alive","involuntary"],
+      hints:["These are things your body does without you having to think about them.","The brainstem controls _____ functions like breathing and _____ rate."],
+      answer:"The brainstem controls the body's automatic (autonomic) functions — breathing, heart rate, blood pressure, and sleep cycles. It connects the brain to the spinal cord.", points:10 },
+    { q:"What does the cerebellum control?", keywords:["balance","coordination","motor","movement","procedural","timing","fine","skilled"],
+      hints:["Think about activities that require precise physical control — riding a bike, catching a ball.","The cerebellum coordinates _____, balance, and fine _____ skills."],
+      answer:"The cerebellum coordinates movement, balance, and fine motor skills. It is also involved in timing and procedural memory (like learning to ride a bike).", points:10 },
+    { q:"Which brain region is associated with the fight-or-flight response?", keywords:["amygdala","fight","flight","fear","stress","threat","alarm","emotion"],
+      hints:["It's a small almond-shaped structure deep in the brain.","The _____ is the brain's emotional alarm system and triggers the fight-or-flight response."],
+      answer:"The amygdala is associated with the fight-or-flight response. It detects threats and triggers the physiological stress response before the conscious brain has registered the danger.", points:10 },
+  ],
+};
+
+// ══ STATE ════════════════════════════════════════════════════════════════════
+let playerName = '';
+let selectedTopic = 'all';
+let currentQuestions = [];
+let currentIdx = 0;
+let score = 0;
+let streak = 0;
+let bestStreak = 0;
+let hintsUsed = 0;
+let hintLevel = 0;
+let answered = false;
+let leaderboard = JSON.parse(localStorage.getItem('psych_lb') || '[]');
+
+// ══ TOPIC / NAME ═════════════════════════════════════════════════════════════
+function selectTopic(t) {
+  selectedTopic = t;
+  document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('t-'+t).classList.add('selected');
+  checkNameReady();
+}
+function checkNameReady() {
+  const name = document.getElementById('player-name').value.trim();
+  document.getElementById('start-btn').disabled = name.length < 1;
+}
+// Default: all topics selected
+document.getElementById('t-all').classList.add('selected');
+
+// ══ BUILD QUESTION SET ═══════════════════════════════════════════════════════
+function shuffle(arr) { return [...arr].sort(()=>Math.random()-.5); }
+
+function buildQuestions() {
+  let pool = [];
+  if(selectedTopic === 'all') {
+    Object.entries(QUESTIONS).forEach(([topic, qs]) => {
+      qs.forEach(q => pool.push({...q, topic}));
+    });
+  } else {
+    pool = QUESTIONS[selectedTopic].map(q => ({...q, topic: selectedTopic}));
+  }
+  return shuffle(pool).slice(0, 10);
+}
+
+// ══ START ════════════════════════════════════════════════════════════════════
+function startQuiz() {
+  playerName = document.getElementById('player-name').value.trim();
+  currentQuestions = buildQuestions();
+  currentIdx = 0; score = 0; streak = 0; bestStreak = 0; hintsUsed = 0;
+  document.getElementById('name-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('header-stats').style.display = 'flex';
+  updateHeaderStats();
+  loadQuestion();
+}
+
+// ══ LOAD QUESTION ════════════════════════════════════════════════════════════
+function loadQuestion() {
+  const q = currentQuestions[currentIdx];
+  answered = false;
+  hintLevel = 0;
+
+  // Progress
+  const pct = (currentIdx / currentQuestions.length) * 100;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('q-counter').textContent = `Question ${currentIdx+1} of ${currentQuestions.length}`;
+  updateStreak();
+
+  // Topic tag
+  const tag = document.getElementById('topic-tag');
+  const labels = {variables:'🔬 Variables', ethics:'⚖️ Ethics', research:'🧪 Research Methods', brain:'🧠 Brain Regions'};
+  tag.textContent = labels[q.topic] || q.topic;
+  tag.className = 'topic-tag ' + q.topic;
+
+  // Question
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('q-points').textContent = `Worth ${q.points} points${streak>=3?' · 🔥 Streak bonus active!':''}`;
+
+  // Reset input/feedback
+  const input = document.getElementById('answer-input');
+  input.value = '';
+  input.className = 'answer-input';
+  input.disabled = false;
+
+  document.getElementById('hint-box').className = 'hint-box';
+  document.getElementById('hint-btn').disabled = false;
+  document.getElementById('hint-btn').textContent = '💡 Hint';
+  document.getElementById('submit-btn').disabled = true;
+  document.getElementById('feedback-card').className = 'feedback-card';
+  document.getElementById('next-btn').className = 'next-btn';
+
+  // Animate
+  document.getElementById('q-card').classList.add('pop');
+  setTimeout(()=>document.getElementById('q-card').classList.remove('pop'), 350);
+}
+
+function onAnswerType() {
+  const val = document.getElementById('answer-input').value.trim();
+  document.getElementById('submit-btn').disabled = val.length < 2;
+}
+
+// ══ HINTS ════════════════════════════════════════════════════════════════════
+function showHint() {
+  const q = currentQuestions[currentIdx];
+  if(hintLevel >= q.hints.length) return;
+  const box = document.getElementById('hint-box');
+  document.getElementById('hint-level').textContent = `Hint ${hintLevel+1} of ${q.hints.length}`;
+  document.getElementById('hint-text').textContent = q.hints[hintLevel];
+  box.className = 'hint-box show';
+  hintLevel++;
+  hintsUsed++;
+  if(hintLevel >= q.hints.length) {
+    document.getElementById('hint-btn').disabled = true;
+    document.getElementById('hint-btn').textContent = '💡 No more hints';
+  }
+}
+
+// ══ SUBMIT ═══════════════════════════════════════════════════════════════════
+function submitAnswer() {
+  if(answered) return;
+  answered = true;
+  const q = currentQuestions[currentIdx];
+  const raw = document.getElementById('answer-input').value.trim().toLowerCase();
+  const input = document.getElementById('answer-input');
+  input.disabled = true;
+  document.getElementById('submit-btn').disabled = true;
+  document.getElementById('hint-btn').disabled = true;
+
+  // Score answer
+  const matched = q.keywords.filter(kw => raw.includes(kw.toLowerCase()));
+  const keyCount = q.keywords.length;
+  const ratio = matched.length / keyCount;
+
+  let result, pts, fbTitle, fbBody;
+
+  if(ratio >= 0.35) {
+    // Correct / good enough
+    result = 'correct';
+    pts = q.points;
+    if(streak >= 3) pts = Math.round(pts * 1.5); // streak bonus
+    if(hintLevel > 0) pts = Math.round(pts * 0.7); // hint penalty
+    score += pts;
+    streak++;
+    if(streak > bestStreak) bestStreak = streak;
+    fbTitle = streak > 1 ? `🔥 Correct! ${streak} in a row!` : '✅ Correct!';
+    fbBody = 'Great answer! ' + q.answer;
+    if(hintLevel > 0) fbBody += ` (${Math.round(30)} points deducted for hints used)`;
+    input.className = 'answer-input correct-border';
+  } else if(ratio >= 0.15) {
+    // Partial
+    result = 'partial';
+    pts = Math.round(q.points * 0.4);
+    score += pts;
+    streak = 0;
+    fbTitle = '🟡 Partially correct!';
+    fbBody = `You got part of it — here's the full answer:`;
+    input.className = 'answer-input wrong-border';
+  } else {
+    // Wrong
+    result = 'wrong';
+    pts = 0;
+    streak = 0;
+    fbTitle = '❌ Not quite!';
+    fbBody = `Don't worry — here's the answer to learn from:`;
+    input.className = 'answer-input wrong-border';
+    document.getElementById('q-card').classList.add('shake');
+    setTimeout(()=>document.getElementById('q-card').classList.remove('shake'),350);
+  }
+
+  // Feedback
+  const fb = document.getElementById('feedback-card');
+  fb.className = `feedback-card show ${result}`;
+  document.getElementById('fb-title').textContent = fbTitle;
+  document.getElementById('fb-body').textContent = fbBody;
+  document.getElementById('fb-answer').innerHTML = result !== 'correct'
+    ? `<strong>Model answer:</strong> ${q.answer}`
+    : pts !== q.points ? `<strong>+${pts} points</strong> (hint penalty applied)` : `<strong>+${pts} points!</strong>`;
+
+  updateHeaderStats();
+  updateStreak();
+  document.getElementById('next-btn').className = 'next-btn show';
+}
+
+// ══ NEXT ════════════════════════════════════════════════════════════════════
+function nextQuestion() {
+  currentIdx++;
+  if(currentIdx >= currentQuestions.length) {
+    endQuiz();
+  } else {
+    loadQuestion();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+}
+
+// ══ END ══════════════════════════════════════════════════════════════════════
+function endQuiz() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('score-screen').style.display = 'block';
+
+  document.getElementById('final-score').textContent = score;
+  document.getElementById('fin-correct').textContent = currentQuestions.filter((_,i)=>i<currentIdx).length; // approximate
+  document.getElementById('fin-streak').textContent = bestStreak;
+  document.getElementById('fin-hints').textContent = hintsUsed;
+
+  const pct = score / currentQuestions.reduce((a,q)=>a+q.points,0);
+  let msg = pct >= .9 ? "🏆 Outstanding! You've mastered this topic." :
+            pct >= .7 ? "🎉 Great work — you clearly know your stuff!" :
+            pct >= .5 ? "👍 Good effort — review the questions you missed and try again." :
+                        "💪 Keep practising — use the lesson pages to review before your next attempt.";
+  document.getElementById('final-msg').textContent = msg;
+
+  // Save to leaderboard
+  leaderboard.push({ name: playerName, score, topic: selectedTopic, date: new Date().toLocaleDateString() });
+  leaderboard.sort((a,b)=>b.score-a.score);
+  leaderboard = leaderboard.slice(0,10);
+  localStorage.setItem('psych_lb', JSON.stringify(leaderboard));
+  renderLeaderboard('lb-body-2');
+  renderLeaderboard('lb-body');
+
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ══ LEADERBOARD ══════════════════════════════════════════════════════════════
+const MEDALS = ['🥇','🥈','🥉'];
+const TOPIC_LABELS = {all:'All', variables:'Variables', ethics:'Ethics', research:'Research', brain:'Brain'};
+
+function renderLeaderboard(elId) {
+  const el = document.getElementById(elId);
+  if(!el) return;
+  if(leaderboard.length === 0) { el.innerHTML='<div class="lb-empty">No scores yet — be the first!</div>'; return; }
+  el.innerHTML = leaderboard.map((e,i)=>`
+    <div class="lb-row">
+      <div class="lb-rank">${MEDALS[i]||'#'+(i+1)}</div>
+      <div class="lb-name">${e.name}<br><span class="lb-topic">${TOPIC_LABELS[e.topic]||e.topic} · ${e.date}</span></div>
+      <div class="lb-score">${e.score} pts</div>
+    </div>`).join('');
+}
+renderLeaderboard('lb-body');
+
+// ══ UI HELPERS ══════════════════════════════════════════════════════════════
+function updateHeaderStats() {
+  document.getElementById('h-score').textContent  = score;
+  document.getElementById('h-streak').textContent = streak;
+}
+function updateStreak() {
+  const el = document.getElementById('streak-display');
+  el.textContent = `🔥 ${streak} streak`;
+  el.className = 'streak-badge' + (streak >= 3 ? ' hot' : '');
+}
+function goToStart() {
+  document.getElementById('score-screen').style.display = 'none';
+  document.getElementById('name-screen').style.display = 'block';
+  document.getElementById('header-stats').style.display = 'none';
+  renderLeaderboard('lb-body');
+}
+function retryQuiz() { startQuiz(); }
+</script>
+</body>
+</html>
