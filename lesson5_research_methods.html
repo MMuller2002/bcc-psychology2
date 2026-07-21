@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 5 — Research Methods & Cognitive Experiments</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy: #1B2A4A; --gold: #C9A84C; --bg: #F7F5F0; --surface: #fff;
+  --border: #E2DDD6; --text: #1A1A1A; --muted: #6B6560; --radius: 10px;
+  --iv: #5B4FCC; --iv-bg: #EEEDFE;
+  --dv: #1A7A4A; --dv-bg: #E8F5EE;
+  --cv: #BF5000; --cv-bg: #FEF3E7;
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+
+/* Header */
+header { background: var(--navy); color: white; padding: 1.25rem 2rem; border-bottom: 3px solid var(--gold); }
+.header-inner { max-width: 1020px; margin: 0 auto; }
+.badge { background: var(--gold); color: var(--navy); font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px; display: inline-block; margin-bottom: 6px; }
+header h1 { font-size: 20px; font-weight: 600; }
+header p  { font-size: 13px; opacity: .65; margin-top: 2px; }
+
+/* Timer bar */
+.timer-bar { background: var(--navy); border-bottom: 1px solid rgba(255,255,255,.1); padding: .6rem 2rem; }
+.timer-inner { max-width: 1020px; margin: 0 auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.timer-label { color: rgba(255,255,255,.7); font-size: 13px; }
+.phase-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.phase-pill { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600; cursor: pointer; transition: opacity .15s; border: 1px solid rgba(255,255,255,.2); color: white; background: rgba(255,255,255,.1); }
+.phase-pill:hover { opacity: .8; }
+.phase-pill.active { background: var(--gold); color: var(--navy); border-color: var(--gold); }
+.lesson-timer { margin-left: auto; font-size: 13px; color: var(--gold); font-weight: 600; }
+
+/* Nav */
+.nav-bar { background: white; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
+.nav-inner { max-width: 1020px; margin: 0 auto; display: flex; overflow-x: auto; padding: 0 1rem; }
+.nav-tab { background: none; border: none; border-bottom: 3px solid transparent; padding: 11px 16px; font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; white-space: nowrap; margin-bottom: -1px; transition: color .15s, border-color .15s; }
+.nav-tab.active { color: var(--navy); border-bottom-color: var(--gold); }
+.nav-tab:hover:not(.active) { color: var(--text); }
+
+main { max-width: 1020px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+.section { display: none; }
+.section.active { display: block; }
+
+/* Cards */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.25rem; }
+.card-title { font-size: 16px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
+.card-sub   { font-size: 13px; color: var(--muted); margin-bottom: 1rem; }
+
+/* Hook */
+.hook { background: linear-gradient(135deg, var(--navy), #2E4070); border-radius: var(--radius); padding: 1.75rem 2rem; margin-bottom: 1.25rem; color: white; }
+.hook-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; opacity: .6; margin-bottom: 8px; }
+.hook h2 { font-size: 20px; font-weight: 600; line-height: 1.45; margin-bottom: 1rem; }
+.hook-note { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); border-radius: 8px; padding: 10px 14px; font-size: 14px; }
+
+/* Goals */
+.goals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media(max-width:560px){ .goals-grid { grid-template-columns: 1fr; } }
+.goal-item { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 11px 14px; font-size: 14px; display: flex; gap: 10px; }
+.gnum { background: var(--navy); color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; margin-top: 1px; }
+.sc-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; font-size: 14px; margin-bottom: 8px; }
+.sc-check { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 4px; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; margin-top: 1px; }
+.sc-check.checked { background: var(--navy); border-color: var(--navy); }
+.sc-check.checked::after { content: '✓'; color: white; font-size: 11px; }
+
+/* Timing badges */
+.time-badge { display: inline-flex; align-items: center; gap: 5px; background: var(--gold); color: var(--navy); font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; }
+
+/* Good vs Bad questions */
+.qcompare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.25rem; }
+@media(max-width:540px){ .qcompare { grid-template-columns: 1fr; } }
+.q-bad  { background: #FFEBEE; border: 1px solid #C62828; border-radius: 10px; padding: 1.1rem; }
+.q-good { background: #E8F5EE; border: 1px solid #2E7D32; border-radius: 10px; padding: 1.1rem; }
+.q-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+.q-bad  .q-label { color: #C62828; }
+.q-good .q-label { color: #2E7D32; }
+.q-text { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 8px; }
+.q-why  { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+/* Hypothesis builder */
+.hyp-builder { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1.25rem; }
+.hyp-header { background: var(--navy); color: white; padding: .9rem 1.25rem; }
+.hyp-header h3 { font-size: 15px; font-weight: 600; }
+.hyp-header p  { font-size: 12px; opacity: .65; margin-top: 2px; }
+.hyp-body { padding: 1.25rem; }
+.hyp-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.hyp-connector { font-size: 13px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.hyp-input { flex: 1; min-width: 120px; border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 14px; font-family: inherit; color: var(--text); transition: border-color .15s; background: var(--bg); }
+.hyp-input:focus { outline: none; border-color: var(--gold); background: white; }
+.hyp-input.if-field  { border-color: var(--iv); background: var(--iv-bg); }
+.hyp-input.then-field { border-color: var(--dv); background: var(--dv-bg); }
+.hyp-input.bec-field  { border-color: var(--cv); background: var(--cv-bg); }
+.hyp-preview { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 14px; color: var(--text); line-height: 1.6; min-height: 52px; }
+.hyp-preview em { color: var(--muted); }
+
+/* Variable sorter */
+.var-game { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1.25rem; }
+.var-game-header { background: linear-gradient(135deg, #2E4070, var(--navy)); color: white; padding: .9rem 1.25rem; }
+.var-game-header h3 { font-size: 15px; font-weight: 600; }
+.var-game-header p  { font-size: 12px; opacity: .65; margin-top: 2px; }
+.var-game-body { padding: 1.25rem; }
+.scenario-display { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; font-size: 15px; font-weight: 500; margin-bottom: 1rem; line-height: 1.5; }
+.drag-zone { min-height: 56px; border: 2px dashed var(--border); border-radius: 8px; padding: 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; transition: border-color .2s, background .2s; }
+.drag-zone.over { border-color: var(--gold); background: #FDF6E3; }
+.drag-zone.correct-zone { border-color: #2E7D32; background: var(--dv-bg); }
+.drag-zone.wrong-zone   { border-color: #C62828; background: #FFEBEE; }
+.drop-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.drop-label.iv { color: var(--iv); }
+.drop-label.dv { color: var(--dv); }
+.drop-label.cv { color: var(--cv); }
+.var-chip { background: var(--surface); border: 1.5px solid var(--border); border-radius: 8px; padding: 7px 14px; font-size: 13px; cursor: grab; user-select: none; transition: box-shadow .1s, transform .1s; white-space: nowrap; }
+.var-chip:active { cursor: grabbing; transform: scale(1.04); box-shadow: 0 4px 12px rgba(0,0,0,.12); }
+.var-chip.placed-iv { background: var(--iv-bg); border-color: var(--iv); color: var(--iv); }
+.var-chip.placed-dv { background: var(--dv-bg); border-color: var(--dv); color: var(--dv); }
+.var-chip.placed-cv { background: var(--cv-bg); border-color: var(--cv); color: var(--cv); }
+.var-zones { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+@media(max-width:600px){ .var-zones { grid-template-columns: 1fr; } }
+.var-bank { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1rem; }
+.var-feedback { font-size: 14px; min-height: 22px; color: var(--muted); padding: 0 2px; }
+.var-feedback.pass { color: #2E7D32; font-weight: 600; }
+.var-feedback.fail { color: #C62828; }
+.check-var-btn { background: var(--navy); color: white; border: none; border-radius: 8px; padding: 9px 22px; font-size: 14px; font-weight: 500; cursor: pointer; margin-right: 8px; transition: opacity .15s; }
+.check-var-btn:hover { opacity: .85; }
+.reset-btn { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 9px 16px; font-size: 13px; color: var(--muted); cursor: pointer; }
+.reset-btn:hover { background: var(--bg); }
+
+/* Research lab cards */
+.lab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.25rem; }
+@media(max-width:600px){ .lab-grid { grid-template-columns: 1fr; } }
+.lab-card { border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+.lab-card-header { padding: 10px 14px; color: white; font-size: 14px; font-weight: 600; }
+.lab-card-body { padding: 14px; background: var(--surface); }
+.lab-q { font-size: 13px; color: var(--muted); margin-bottom: 10px; line-height: 1.5; }
+.lab-field { width: 100%; border: 1.5px solid var(--border); border-radius: 7px; padding: 8px 10px; font-size: 13px; font-family: inherit; color: var(--text); background: var(--bg); resize: none; transition: border-color .15s; }
+.lab-field:focus { outline: none; border-color: var(--gold); background: white; }
+.lab-field-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); margin-bottom: 4px; margin-top: 8px; }
+
+/* Presentations */
+.pitch-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.25rem; }
+.pitch-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.pitch-card-header { background: var(--bg); padding: 10px 14px; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.pitch-card-header h4 { font-size: 14px; font-weight: 600; color: var(--navy); flex: 1; }
+.pitch-card-body { padding: 14px; display: none; }
+.pitch-card-body.open { display: block; }
+.pitch-example { background: var(--bg); border-left: 3px solid var(--gold); padding: 10px 14px; border-radius: 0 8px 8px 0; font-size: 14px; font-style: italic; color: var(--text); line-height: 1.6; margin-bottom: 10px; }
+.pitch-input { width: 100%; border: 1.5px solid var(--border); border-radius: 7px; padding: 9px 12px; font-size: 14px; font-family: inherit; background: var(--bg); color: var(--text); resize: vertical; min-height: 72px; transition: border-color .15s; }
+.pitch-input:focus { outline: none; border-color: var(--gold); background: white; }
+
+/* TPS */
+.tps-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 1.25rem; }
+@media(max-width:560px){ .tps-grid { grid-template-columns: 1fr; } }
+.tps-card { border-radius: 10px; padding: 1.1rem; }
+.tps-card.think  { background: #E8EEF7; border: 1px solid #1B2A4A; }
+.tps-card.pair   { background: #E8F5EE; border: 1px solid #2E7D32; }
+.tps-card.share  { background: #FEF3E7; border: 1px solid #BF5000; }
+.tps-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.tps-card.think  .tps-label { color: #1B2A4A; }
+.tps-card.pair   .tps-label { color: #2E7D32; }
+.tps-card.share  .tps-label { color: #BF5000; }
+.tps-card h4 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+.tps-card p  { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.reflection-q { background: linear-gradient(135deg,var(--navy),#2E4070); border-radius: var(--radius); padding: 1.25rem 1.5rem; color: white; margin-bottom: 1rem; }
+.reflection-q .label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; opacity: .6; margin-bottom: 8px; }
+.reflection-q h3 { font-size: 18px; font-weight: 600; line-height: 1.45; }
+.reflection-field { width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 14px; font-family: inherit; background: var(--surface); color: var(--text); resize: vertical; min-height: 90px; transition: border-color .15s; }
+.reflection-field:focus { outline: none; border-color: var(--gold); }
+
+/* Countdown timer widget */
+.countdown-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.countdown-display { font-size: 40px; font-weight: 700; color: var(--navy); font-variant-numeric: tabular-nums; min-width: 100px; }
+.countdown-display.urgent { color: #C62828; }
+.countdown-label { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.timer-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.timer-btn { background: var(--navy); color: white; border: none; border-radius: 8px; padding: 8px 18px; font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity .15s; }
+.timer-btn:hover { opacity: .85; }
+.timer-btn.secondary { background: none; color: var(--navy); border: 1px solid var(--border); }
+.timer-btn.secondary:hover { background: var(--bg); }
+.timer-presets { display: flex; gap: 6px; flex-wrap: wrap; }
+.preset-btn { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 5px 12px; font-size: 12px; color: var(--muted); cursor: pointer; transition: all .1s; }
+.preset-btn:hover { background: var(--bg); color: var(--text); border-color: #C0BAB2; }
+
+/* Steps display */
+.steps-list { display: flex; flex-direction: column; gap: 10px; }
+.step-item { display: flex; gap: 12px; align-items: flex-start; padding: 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 9px; }
+.step-num { background: var(--gold); color: var(--navy); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+.step-text h4 { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+.step-text p  { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+/* Walkthrough accordion */
+.walkthrough { margin-bottom: 1.25rem; }
+.wt-step { background: var(--surface); border: 1px solid var(--border); border-radius: 9px; margin-bottom: 8px; overflow: hidden; }
+.wt-header { padding: 12px 16px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.wt-num { background: var(--navy); color: white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.wt-title { font-size: 14px; font-weight: 600; color: var(--navy); flex: 1; }
+.wt-arrow { color: var(--muted); transition: transform .2s; }
+.wt-arrow.open { transform: rotate(180deg); }
+.wt-body { padding: 14px 16px 16px; border-top: 1px solid var(--border); display: none; }
+.wt-body.open { display: block; }
+.wt-body p { font-size: 14px; color: var(--text); line-height: 1.6; margin-bottom: 8px; }
+.wt-highlight { background: var(--bg); border-radius: 8px; padding: 10px 14px; font-size: 14px; font-style: italic; color: var(--text); margin: 10px 0; border-left: 3px solid var(--gold); }
+.var-badge { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 20px; margin: 2px; }
+.var-badge.iv { background: var(--iv-bg); color: var(--iv); }
+.var-badge.dv { background: var(--dv-bg); color: var(--dv); }
+.var-badge.cv { background: var(--cv-bg); color: var(--cv); }
+
+/* Scenario chips */
+.scenario-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1rem; }
+.scenario-chip { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 13px; color: var(--text); cursor: pointer; transition: all .1s; }
+.scenario-chip:hover { background: #EDE9E3; border-color: #C0BAB2; }
+.scenario-chip.active { background: var(--navy); color: white; border-color: var(--navy); }
+
+/* Fun meter */
+.fun-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1rem; }
+.fun-chip { font-size: 13px; padding: 6px 14px; border-radius: 20px; background: var(--cv-bg); border: 1px solid var(--cv); color: var(--cv); cursor: pointer; }
+.fun-chip:hover { opacity: .8; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.section.active > * { animation: fadeUp .22s ease both; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="badge">Year 9 Psychology · Lesson 5 · 70 minutes</div>
+    <h1>Research Methods & Cognitive Experiments</h1>
+    <p>Designing testable research questions, hypotheses, and experiment plans</p>
+  </div>
+</header>
+
+<!-- Lesson phase progress -->
+<div class="timer-bar">
+  <div class="timer-inner">
+    <span class="timer-label">Lesson phase:</span>
+    <div class="phase-pills">
+      <div class="phase-pill active" onclick="setPhase(0)">🎯 Hook (0–5 min)</div>
+      <div class="phase-pill" onclick="setPhase(1)">📋 Teach (5–25 min)</div>
+      <div class="phase-pill" onclick="setPhase(2)">🔬 Lab Challenge (25–45 min)</div>
+      <div class="phase-pill" onclick="setPhase(3)">🎤 Pitches (45–60 min)</div>
+      <div class="phase-pill" onclick="setPhase(4)">💭 Reflect (60–70 min)</div>
+    </div>
+    <span class="lesson-timer" id="lesson-clock">⏱ 70:00</span>
+  </div>
+</div>
+
+<nav class="nav-bar">
+  <div class="nav-inner">
+    <button class="nav-tab active" onclick="show('overview')">Overview</button>
+    <button class="nav-tab" onclick="show('hook')">Hook</button>
+    <button class="nav-tab" onclick="show('teach')">Teach</button>
+    <button class="nav-tab" onclick="show('lab')">Lab Challenge</button>
+    <button class="nav-tab" onclick="show('pitch')">Pitches</button>
+    <button class="nav-tab" onclick="show('exit')">Exit Ticket</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- ══ OVERVIEW ══════════════════════════════════════════════════════════════ -->
+<div class="section active" id="s-overview">
+
+  <div class="card">
+    <div class="card-title">📋 Lesson at a Glance — 70 minutes</div>
+    <div class="card-sub">Five phases — keep an eye on the phase indicator at the top of the page.</div>
+    <div class="steps-list">
+      <div class="step-item"><div class="step-num">1</div><div class="step-text"><h4>🎯 Hook — 5 min</h4><p>Good vs. bad research question quiz. Class vote on whether each question is testable.</p></div></div>
+      <div class="step-item"><div class="step-num">2</div><div class="step-text"><h4>📋 Teach — 20 min</h4><p>Walkthrough the four steps in experimental design. Interactive hypothesis builder and variable sorting game.</p></div></div>
+      <div class="step-item"><div class="step-num">3</div><div class="step-text"><h4>🔬 Psychology Research Lab Challenge — 20 min</h4><p>Pairs choose a scenario and design a complete experiment — research question, hypothesis, and variables.</p></div></div>
+      <div class="step-item"><div class="step-num">4</div><div class="step-text"><h4>🎤 Mini-Pitches — 15 min</h4><p>Each pair pitches their experiment in 60 seconds. Class gives feedback using the peer assessment rubric.</p></div></div>
+      <div class="step-item"><div class="step-num">5</div><div class="step-text"><h4>💭 Think-Pair-Share Reflection — 10 min</h4><p>Exit question: "Why does a research question need to be testable?" Written response + class share.</p></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📚 Learning Goals</div>
+    <div class="card-sub">By the end of this lesson you will be able to:</div>
+    <div class="goals-grid">
+      <div class="goal-item"><div class="gnum">1</div>Formulate a testable research question and hypothesis for a cognitive experiment.</div>
+      <div class="goal-item"><div class="gnum">2</div>Plan the key steps in an experiment, identifying IV, DV, and controlled variables.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">✅ Success Criteria</div>
+    <div class="card-sub">Tick each one as you feel confident:</div>
+    <div class="sc-item"><div class="sc-check" onclick="tick(this)"></div>I can write a clear, testable research question.</div>
+    <div class="sc-item"><div class="sc-check" onclick="tick(this)"></div>I can write a hypothesis using the format "If ____, then ____ because ____."</div>
+    <div class="sc-item" style="margin-bottom:0"><div class="sc-check" onclick="tick(this)"></div>I can identify the IV, DV, and at least two controlled variables in a given experiment.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📖 Resources</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px">
+      <div style="flex:1;min-width:180px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:14px"><strong>📕 Textbook</strong><br><span style="color:var(--muted);font-size:13px">Cambridge Get Psyched! — Research Methods Section</span></div>
+      <div style="flex:1;min-width:180px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:14px"><strong>📄 Handout</strong><br><span style="color:var(--muted);font-size:13px">Lesson 5 Steps in Experimental Design — on your LMS</span></div>
+      <div style="flex:1;min-width:180px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:14px"><strong>🗳️ Mentimeter</strong><br><span style="color:var(--muted);font-size:13px">Live polling for the hook activity — teacher will share the code</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HOOK ═══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s-hook">
+
+  <div class="countdown-wrap">
+    <div>
+      <div class="countdown-display" id="timer-display">05:00</div>
+      <div class="countdown-label">Activity timer</div>
+    </div>
+    <div>
+      <div class="timer-btns" style="margin-bottom:8px">
+        <button class="timer-btn" onclick="startTimer()">▶ Start</button>
+        <button class="timer-btn secondary" onclick="pauseTimer()">⏸ Pause</button>
+        <button class="timer-btn secondary" onclick="resetTimer()">↺ Reset</button>
+      </div>
+      <div class="timer-presets">
+        <button class="preset-btn" onclick="setTimerMins(2)">2 min</button>
+        <button class="preset-btn" onclick="setTimerMins(5)">5 min</button>
+        <button class="preset-btn" onclick="setTimerMins(10)">10 min</button>
+        <button class="preset-btn" onclick="setTimerMins(15)">15 min</button>
+        <button class="preset-btn" onclick="setTimerMins(20)">20 min</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hook">
+    <div class="hook-eyebrow">🎯 Lesson Hook — 5 minutes</div>
+    <h2>"What makes a research question testable?"</h2>
+    <div class="hook-note">🗳️ <em>Your teacher will open a Mentimeter poll — type your answer before we look at examples together.</em></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">👍 Good vs. Bad — Can you tell the difference?</div>
+    <div class="card-sub">Vote on each question: is it <strong>testable</strong> or <strong>too vague</strong>? Then read why below.</div>
+  </div>
+
+  <div id="quiz-container"></div>
+
+  <div class="card" style="margin-top:1.25rem">
+    <div class="card-title">📐 What makes a research question TESTABLE?</div>
+    <div class="card-sub">A good research question has all four of these:</div>
+    <div class="steps-list">
+      <div class="step-item"><div class="step-num">1</div><div class="step-text"><h4>Specific</h4><p>It names exactly what is being tested — not vague terms like "music" or "stress" without context.</p></div></div>
+      <div class="step-item"><div class="step-num">2</div><div class="step-text"><h4>Measurable</h4><p>The outcome can be counted, scored, or recorded — e.g. "number of words recalled," "reaction time in milliseconds."</p></div></div>
+      <div class="step-item"><div class="step-num">3</div><div class="step-text"><h4>One clear variable changed</h4><p>There is one thing that changes (the IV) and one thing that measures the effect (the DV).</p></div></div>
+      <div class="step-item"><div class="step-num">4</div><div class="step-text"><h4>Answerable by an experiment</h4><p>You can actually run a study to answer it — not a philosophical or moral question.</p></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TEACH ══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s-teach">
+
+  <div class="time-badge">⏱ 20 minutes</div>
+
+  <div class="card">
+    <div class="card-title">📋 The Four Steps in Experimental Design</div>
+    <div class="card-sub">Every psychological experiment follows these steps. Click each one to expand the detail.</div>
+  </div>
+
+  <div class="walkthrough">
+    <div class="wt-step">
+      <div class="wt-header" onclick="toggleWT(this)">
+        <div class="wt-num">1</div>
+        <div class="wt-title">Formulate a Research Question</div>
+        <div class="wt-arrow">▼</div>
+      </div>
+      <div class="wt-body">
+        <p>A research question asks what you want to find out. It must be specific, measurable, and focused on one variable that you will change.</p>
+        <div class="wt-highlight">"Does listening to music while studying affect memory recall?"</div>
+        <p><strong>Why it works:</strong> It names the IV (music), the DV (memory recall), and the population (students studying). It is specific enough to test.</p>
+      </div>
+    </div>
+    <div class="wt-step">
+      <div class="wt-header" onclick="toggleWT(this)">
+        <div class="wt-num">2</div>
+        <div class="wt-title">Develop a Hypothesis</div>
+        <div class="wt-arrow">▼</div>
+      </div>
+      <div class="wt-body">
+        <p>A hypothesis is a prediction about what you think will happen — and why. Use this format:</p>
+        <div class="wt-highlight">"If [IV], then [DV outcome] because [reason based on prior knowledge]."</div>
+        <p><strong>Example:</strong> "If students listen to music while studying, then their memory recall will decrease, because music divides their attention between the lyrics and the material they are learning."</p>
+        <p style="margin-top:8px">The "because" is important — it shows you are making a prediction based on reasoning, not just a guess.</p>
+      </div>
+    </div>
+    <div class="wt-step">
+      <div class="wt-header" onclick="toggleWT(this)">
+        <div class="wt-num">3</div>
+        <div class="wt-title">Identify Variables</div>
+        <div class="wt-arrow">▼</div>
+      </div>
+      <div class="wt-body">
+        <p>Every experiment has three types of variables. For the music and memory experiment:</p>
+        <p style="margin-top:8px"><span class="var-badge iv">IV — Independent</span> <strong>Presence of music</strong> — music vs. silence. This is what we change.</p>
+        <p style="margin-top:6px"><span class="var-badge dv">DV — Dependent</span> <strong>Number of words recalled</strong> from a list. This is what we measure.</p>
+        <p style="margin-top:6px"><span class="var-badge cv">CV — Controlled</span> Same word list, same study time, same environment, same instructions for all participants. These are kept the same to make the test fair.</p>
+      </div>
+    </div>
+    <div class="wt-step">
+      <div class="wt-header" onclick="toggleWT(this)">
+        <div class="wt-num">4</div>
+        <div class="wt-title">Plan the Procedure</div>
+        <div class="wt-arrow">▼</div>
+      </div>
+      <div class="wt-body">
+        <p>The procedure describes exactly how you would run the experiment — step by step — so that someone else could replicate it.</p>
+        <p style="margin-top:8px">For the music experiment, the procedure might include:</p>
+        <ul style="margin: 8px 0 0 18px; font-size:14px; color:var(--text); line-height:1.7">
+          <li>Recruit 30 student participants (15 per group)</li>
+          <li>Give all participants the same list of 20 words to study for 5 minutes</li>
+          <li>Group A studies with music; Group B studies in silence</li>
+          <li>After 5 minutes, remove the list and ask all participants to write down as many words as they remember in 2 minutes</li>
+          <li>Count and record the number of correct words recalled per participant</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hypothesis builder -->
+  <div class="hyp-builder">
+    <div class="hyp-header">
+      <h3>🧪 Interactive Hypothesis Builder</h3>
+      <p>Type in each field and watch your hypothesis build in real time</p>
+    </div>
+    <div class="hyp-body">
+      <div class="hyp-row">
+        <span class="hyp-connector" style="color:var(--iv);font-size:15px">If</span>
+        <input class="hyp-input if-field" id="hyp-if" placeholder="students listen to music while studying…" oninput="buildHyp()">
+      </div>
+      <div class="hyp-row">
+        <span class="hyp-connector" style="color:var(--dv);font-size:15px">then</span>
+        <input class="hyp-input then-field" id="hyp-then" placeholder="their memory recall will decrease…" oninput="buildHyp()">
+      </div>
+      <div class="hyp-row">
+        <span class="hyp-connector" style="color:var(--cv);font-size:15px">because</span>
+        <input class="hyp-input bec-field" id="hyp-bec" placeholder="music divides attention between the lyrics and the material…" oninput="buildHyp()">
+      </div>
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px;margin-top:4px">Your hypothesis:</div>
+      <div class="hyp-preview" id="hyp-preview"><em>Start typing above to build your hypothesis…</em></div>
+    </div>
+  </div>
+
+  <!-- Variable sorting game -->
+  <div class="var-game">
+    <div class="var-game-header">
+      <h3>🎮 Variable Sorting Game</h3>
+      <p>Drag each item into the correct category — then check your answers</p>
+    </div>
+    <div class="var-game-body">
+      <div id="vg-scenario-label" style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px">Experiment scenario:</div>
+      <div class="scenario-display" id="vg-scenario">Does drinking energy drinks improve focus during study sessions?</div>
+
+      <div style="margin-bottom:10px">
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px">Drag the chips into the right box:</div>
+        <div class="var-bank" id="var-bank"></div>
+      </div>
+
+      <div class="var-zones">
+        <div>
+          <div class="drop-label iv">Independent Variable</div>
+          <div class="drag-zone" id="zone-iv" ondrop="dropChip(event,'iv')" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')"></div>
+        </div>
+        <div>
+          <div class="drop-label dv">Dependent Variable</div>
+          <div class="drag-zone" id="zone-dv" ondrop="dropChip(event,'dv')" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')"></div>
+        </div>
+        <div>
+          <div class="drop-label cv">Controlled Variables</div>
+          <div class="drag-zone" id="zone-cv" ondrop="dropChip(event,'cv')" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')"></div>
+        </div>
+      </div>
+
+      <div class="var-feedback" id="var-feedback"></div>
+      <div style="margin-top:.75rem;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="check-var-btn" onclick="checkVars()">Check answers</button>
+        <button class="reset-btn" onclick="resetVars()">↺ Reset</button>
+        <button class="reset-btn" onclick="nextScenario()" style="margin-left:auto">Next scenario →</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ LAB CHALLENGE ═══════════════════════════════════════════════════════ -->
+<div class="section" id="s-lab">
+
+  <div class="time-badge">⏱ 20 minutes — work in pairs</div>
+
+  <div class="countdown-wrap">
+    <div>
+      <div class="countdown-display" id="timer-display-2">20:00</div>
+      <div class="countdown-label">Lab challenge timer</div>
+    </div>
+    <div>
+      <div class="timer-btns" style="margin-bottom:8px">
+        <button class="timer-btn" onclick="startTimer2()">▶ Start</button>
+        <button class="timer-btn secondary" onclick="pauseTimer2()">⏸ Pause</button>
+        <button class="timer-btn secondary" onclick="resetTimer2()">↺ Reset</button>
+      </div>
+      <div class="timer-presets">
+        <button class="preset-btn" onclick="setTimerMins2(10)">10 min</button>
+        <button class="preset-btn" onclick="setTimerMins2(15)">15 min</button>
+        <button class="preset-btn" onclick="setTimerMins2(20)">20 min</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔬 Psychology Research Lab Challenge</div>
+    <div class="card-sub">Choose one scenario below, then complete your experiment design in the fields provided. You will pitch this to the class in the next phase.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Choose your scenario</div>
+    <div class="card-sub">Tap to select — or propose your own to your teacher.</div>
+    <div class="scenario-chips">
+      <div class="scenario-chip active" id="sc-0" onclick="selectScenario(0)">📱 Does phone use before bed affect morning reaction time?</div>
+      <div class="scenario-chip" id="sc-1" onclick="selectScenario(1)">📄 Does the colour of paper influence test performance?</div>
+      <div class="scenario-chip" id="sc-2" onclick="selectScenario(2)">⚡ Does drinking energy drinks improve focus during study?</div>
+      <div class="scenario-chip" id="sc-3" onclick="selectScenario(3)">🍫 Does eating chocolate before an exam improve test scores?</div>
+      <div class="scenario-chip" id="sc-4" onclick="selectScenario(4)">🧦 Does wearing socks to bed help people fall asleep faster?</div>
+      <div class="scenario-chip" id="sc-5" onclick="selectScenario(5)">🚶 Do people walk faster when they are late?</div>
+    </div>
+  </div>
+
+  <div class="lab-grid">
+    <div class="lab-card">
+      <div class="lab-card-header" style="background:var(--navy)">📝 Research Question & Hypothesis</div>
+      <div class="lab-card-body">
+        <div class="lab-field-label">Research Question</div>
+        <textarea class="lab-field" id="lab-rq" rows="2" placeholder="Write your testable research question here…"></textarea>
+        <div class="lab-field-label" style="margin-top:12px">Hypothesis — If… then… because…</div>
+        <textarea class="lab-field" id="lab-hyp" rows="3" placeholder="If ______, then ______ because ______…"></textarea>
+      </div>
+    </div>
+    <div class="lab-card">
+      <div class="lab-card-header" style="background:var(--iv)">🎛️ Independent Variable</div>
+      <div class="lab-card-body">
+        <div class="lab-q">What is the ONE thing you are changing between your two groups?</div>
+        <textarea class="lab-field" id="lab-iv" rows="2" placeholder="e.g. Whether participants use their phone for 1 hour before bed, or don't use their phone at all…"></textarea>
+        <div class="lab-field-label" style="margin-top:10px">The two conditions are:</div>
+        <textarea class="lab-field" id="lab-iv2" rows="2" placeholder="Condition A: ______    Condition B: ______"></textarea>
+      </div>
+    </div>
+    <div class="lab-card">
+      <div class="lab-card-header" style="background:var(--dv)">📊 Dependent Variable</div>
+      <div class="lab-card-body">
+        <div class="lab-q">What will you measure? How will you measure it? Be specific — give units where possible.</div>
+        <textarea class="lab-field" id="lab-dv" rows="2" placeholder="e.g. Reaction time, measured in milliseconds using an online reaction time test…"></textarea>
+        <div class="lab-field-label" style="margin-top:10px">How will you record this?</div>
+        <textarea class="lab-field" id="lab-dv2" rows="2" placeholder="e.g. Record each participant's average of three reaction time attempts on a results sheet…"></textarea>
+      </div>
+    </div>
+    <div class="lab-card">
+      <div class="lab-card-header" style="background:var(--cv)">🔒 Controlled Variables</div>
+      <div class="lab-card-body">
+        <div class="lab-q">List at least three things you will keep the same for all participants to make the test fair.</div>
+        <textarea class="lab-field" id="lab-cv" rows="5" placeholder="1. Same time of day for testing&#10;2. Same reaction time test used for everyone&#10;3. Same instructions given to all participants&#10;4. "></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="lab-card" style="margin-bottom:1.25rem">
+    <div class="lab-card-header" style="background:#2E4070">📋 Procedure Summary</div>
+    <div class="lab-card-body">
+      <div class="lab-q">Briefly describe how you would run your experiment, step by step. Someone else should be able to replicate it from your description.</div>
+      <textarea class="lab-field" id="lab-proc" rows="5" placeholder="Step 1: Recruit __ participants and randomly assign them to Group A or Group B.&#10;Step 2: &#10;Step 3: &#10;Step 4: Measure and record the DV.&#10;Step 5: Compare results between groups."></textarea>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🤔 Bonus thinking questions</div>
+    <div class="card-sub">Discuss with your partner if you have time:</div>
+    <div class="steps-list">
+      <div class="step-item"><div class="step-num">?</div><div class="step-text"><h4>What ethical issues might arise?</h4><p>Think about informed consent, harm, and privacy in the context of your specific experiment.</p></div></div>
+      <div class="step-item"><div class="step-num">?</div><div class="step-text"><h4>What could go wrong?</h4><p>What are the limitations of your design? What might make your results unreliable?</p></div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ PITCH ══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s-pitch">
+
+  <div class="time-badge">⏱ 15 minutes — 60 seconds per pair</div>
+
+  <div class="card">
+    <div class="card-title">🎤 Mini-Pitch Format</div>
+    <div class="card-sub">Each pair has exactly 60 seconds to pitch their experiment. Cover all four points:</div>
+    <div class="steps-list">
+      <div class="step-item"><div class="step-num">1</div><div class="step-text"><h4>The question</h4><p>"We investigated whether ______…"</p></div></div>
+      <div class="step-item"><div class="step-num">2</div><div class="step-text"><h4>The hypothesis</h4><p>"Our hypothesis is: if ______, then ______ because ______."</p></div></div>
+      <div class="step-item"><div class="step-num">3</div><div class="step-text"><h4>The variables</h4><p>"Our IV is ______, our DV is ______, and we would control ______."</p></div></div>
+      <div class="step-item"><div class="step-num">4</div><div class="step-text"><h4>One challenge</h4><p>"One limitation of our design is ______."</p></div></div>
+    </div>
+  </div>
+
+  <div class="countdown-wrap">
+    <div>
+      <div class="countdown-display" id="timer-display-3">01:00</div>
+      <div class="countdown-label">Pitch timer — 60 seconds per pair</div>
+    </div>
+    <div>
+      <div class="timer-btns" style="margin-bottom:8px">
+        <button class="timer-btn" onclick="startTimer3()">▶ Start pitch</button>
+        <button class="timer-btn secondary" onclick="pauseTimer3()">⏸ Pause</button>
+        <button class="timer-btn secondary" onclick="resetTimer3()">↺ Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">👂 Audience Peer Feedback</div>
+    <div class="card-sub">While each pair pitches, rate their experiment design using the checklist below. You don't need to share your ratings — just think critically as a class.</div>
+    <div id="peer-feedback-area"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💡 Example Pitches — for inspiration</div>
+    <div class="card-sub">Expand each one to read the example pitch.</div>
+  </div>
+
+  <div class="pitch-cards">
+    <div class="pitch-card">
+      <div class="pitch-card-header" onclick="togglePitch(this)">
+        <h4>📱 Phone use before bed & morning reaction time</h4>
+        <span style="color:var(--muted)">▼</span>
+      </div>
+      <div class="pitch-card-body">
+        <div class="pitch-example">"We investigated whether using a phone before bed affects reaction time in the morning. Our hypothesis is: if students use their phone for one hour before bed, then their reaction time in the morning will be slower, because blue light from screens reduces melatonin production, which disrupts sleep quality and cognitive alertness the next day. Our IV is phone use (one hour of phone use vs. no phone use before bed), our DV is reaction time measured in milliseconds using an online test, and we would control the time of day testing happens and the same reaction time task for everyone. One limitation is that we can't fully control what participants do during the night beyond the phone rule."</div>
+      </div>
+    </div>
+    <div class="pitch-card">
+      <div class="pitch-card-header" onclick="togglePitch(this)">
+        <h4>🍫 Chocolate before an exam & test scores</h4>
+        <span style="color:var(--muted)">▼</span>
+      </div>
+      <div class="pitch-card-body">
+        <div class="pitch-example">"We investigated whether eating chocolate before an exam improves test scores. Our hypothesis is: if students eat dark chocolate 30 minutes before a test, then their scores will be higher, because dark chocolate contains flavonoids that increase blood flow to the brain and may improve short-term cognitive performance. Our IV is chocolate consumption (ate chocolate vs. did not eat chocolate), our DV is score on a 20-question memory test, and we would control the type and amount of chocolate, the test used, and the time between eating and testing. A limitation is that we couldn't control what else participants ate that day, which could affect results."</div>
+      </div>
+    </div>
+    <div class="pitch-card">
+      <div class="pitch-card-header" onclick="togglePitch(this)">
+        <h4>🚶 Being late & walking speed</h4>
+        <span style="color:var(--muted)">▼</span>
+      </div>
+      <div class="pitch-card-body">
+        <div class="pitch-example">"We investigated whether people walk faster when they believe they are late. Our hypothesis is: if people are told they are running 5 minutes late to an appointment, then they will walk measurably faster than people who are told they have plenty of time, because urgency activates the body's stress response, which increases physical output. Our IV is perceived time pressure (told they are late vs. told they have 10 minutes to spare), our DV is walking speed in metres per second over a 20-metre corridor, and we would control the corridor used, the distance, and whether participants are aware they are being timed. A limitation is the ethical challenge of deceiving participants about being late, which would need a thorough debrief."</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ EXIT ═══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s-exit">
+
+  <div class="time-badge">⏱ 10 minutes</div>
+
+  <div class="reflection-q">
+    <div class="label">💭 Lesson Reflection — Think-Pair-Share</div>
+    <h3>"Why is it important for a research question to be clear and testable?"</h3>
+  </div>
+
+  <div class="tps-grid">
+    <div class="tps-card think">
+      <div class="tps-label">Step 1 — Think (2 min)</div>
+      <h4>Write your response</h4>
+      <p>Answer individually in the box below before talking to anyone.</p>
+    </div>
+    <div class="tps-card pair">
+      <div class="tps-label">Step 2 — Pair (3 min)</div>
+      <h4>Discuss with a partner</h4>
+      <p>Share your answer. What did your partner say that you hadn't thought of?</p>
+    </div>
+    <div class="tps-card share">
+      <div class="tps-label">Step 3 — Share (5 min)</div>
+      <h4>Share with the class</h4>
+      <p>Volunteers share. Listen for ideas that are different from yours.</p>
+    </div>
+  </div>
+
+  <textarea class="reflection-field" placeholder="Write your individual response here — consider: What would happen if a research question was too vague? What would happen if the outcome couldn't be measured? Think about the experiments you designed today…"></textarea>
+
+  <div class="card" style="margin-top:1.25rem">
+    <div class="card-title">✅ Lesson Self-Check</div>
+    <div class="card-sub">Before you leave — tick each one if you feel confident:</div>
+    <div class="sc-item"><div class="sc-check" onclick="tick(this)"></div>I can explain the difference between a testable and a non-testable research question.</div>
+    <div class="sc-item"><div class="sc-check" onclick="tick(this)"></div>I can write a hypothesis using the "If…, then…, because…" format.</div>
+    <div class="sc-item"><div class="sc-check" onclick="tick(this)"></div>I can identify the IV, DV, and at least two controlled variables in an experiment.</div>
+    <div class="sc-item" style="margin-bottom:0"><div class="sc-check" onclick="tick(this)"></div>I understand why controlled variables make an experiment fair.</div>
+  </div>
+
+</div>
+</main>
+
+<script>
+// ── Navigation ──────────────────────────────────────────────────────────────
+const TABS = ['overview','hook','teach','lab','pitch','exit'];
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('s-'+id).classList.add('active');
+  document.querySelectorAll('.nav-tab')[TABS.indexOf(id)].classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function tick(el){ el.classList.toggle('checked'); }
+
+// ── Phase pills ──────────────────────────────────────────────────────────────
+const PHASE_TABS = ['overview','hook','teach','lab','pitch','exit'];
+function setPhase(i) {
+  document.querySelectorAll('.phase-pill').forEach((p,j)=>p.classList.toggle('active',j===i));
+  show(PHASE_TABS[i+1] || PHASE_TABS[i]);
+}
+
+// ── Lesson clock (70 min countdown) ─────────────────────────────────────────
+let lessonSecs = 70*60, lessonRunning = false, lessonInterval;
+function startLessonClock() {
+  if(lessonRunning) return;
+  lessonRunning = true;
+  lessonInterval = setInterval(()=>{
+    if(lessonSecs<=0){clearInterval(lessonInterval);return;}
+    lessonSecs--;
+    const m=Math.floor(lessonSecs/60), s=lessonSecs%60;
+    document.getElementById('lesson-clock').textContent=`⏱ ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  },1000);
+}
+// Auto-start lesson clock on load
+document.addEventListener('DOMContentLoaded', startLessonClock);
+
+// ── Activity timers ──────────────────────────────────────────────────────────
+function makeTimer(displayId, defaultMins) {
+  let secs = defaultMins*60, running = false, interval = null;
+  function render() {
+    const m=Math.floor(secs/60), s=secs%60;
+    const el = document.getElementById(displayId);
+    if(!el) return;
+    el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    el.className = 'countdown-display' + (secs<=30?' urgent':'');
+  }
+  return {
+    start(){ if(running)return; running=true; interval=setInterval(()=>{ if(secs<=0){clearInterval(interval);running=false;return;} secs--; render(); },1000); },
+    pause(){ clearInterval(interval); running=false; },
+    reset(){ clearInterval(interval); running=false; secs=defaultMins*60; render(); },
+    set(m){ clearInterval(interval); running=false; secs=m*60; render(); },
+    render,
+  };
+}
+const t1 = makeTimer('timer-display', 5);
+const t2 = makeTimer('timer-display-2', 20);
+const t3 = makeTimer('timer-display-3', 1);
+function startTimer(){ t1.start(); } function pauseTimer(){ t1.pause(); } function resetTimer(){ t1.reset(); } function setTimerMins(m){ t1.set(m); }
+function startTimer2(){ t2.start(); } function pauseTimer2(){ t2.pause(); } function resetTimer2(){ t2.reset(); } function setTimerMins2(m){ t2.set(m); }
+function startTimer3(){ t3.start(); } function pauseTimer3(){ t3.pause(); } function resetTimer3(){ t3.reset(); }
+
+// ── Hypothesis builder ───────────────────────────────────────────────────────
+function buildHyp() {
+  const ifV   = document.getElementById('hyp-if').value.trim();
+  const thenV = document.getElementById('hyp-then').value.trim();
+  const becV  = document.getElementById('hyp-bec').value.trim();
+  const prev  = document.getElementById('hyp-preview');
+  if(!ifV && !thenV && !becV){ prev.innerHTML='<em>Start typing above to build your hypothesis…</em>'; return; }
+  let out = '';
+  if(ifV)   out += `<strong style="color:var(--iv)">If</strong> ${ifV}`;
+  if(thenV) out += (out?', ':'')+`<strong style="color:var(--dv)">then</strong> ${thenV}`;
+  if(becV)  out += (out?' ':'')+`<strong style="color:var(--cv)">because</strong> ${becV}.`;
+  prev.innerHTML = out || '<em>Start typing above…</em>';
+}
+
+// ── Good vs Bad quiz ─────────────────────────────────────────────────────────
+const QS = [
+  { q:"Do people like music?", good:false, why:"Too vague — 'like' is not measurable, and the question doesn't specify what type of music or what population." },
+  { q:"Does listening to music while studying affect memory recall?", good:true, why:"Specific IV (music during study), measurable DV (memory recall), clear population (students studying)." },
+  { q:"Is stress bad?", good:false, why:"'Bad' is subjective and can't be measured. It doesn't specify what type of stress or what outcome we're measuring." },
+  { q:"Does a 10-minute walk before an exam improve concentration on a subsequent 20-question test?", good:true, why:"Specific time (10 min), measurable DV (score on a 20-question test), one clear IV (walking vs. not walking)." },
+  { q:"Do people remember things better when they're happy?", good:false, why:"'Happy' is subjective and hard to control or measure consistently. How would you standardise happiness?" },
+  { q:"Does studying in a quiet room vs. a noisy room affect the number of vocabulary words recalled after 15 minutes?", good:true, why:"Specific conditions (quiet vs. noisy), measurable DV (vocabulary words recalled), controlled time (15 min)." },
+];
+const answers = {};
+function renderQuiz() {
+  const c = document.getElementById('quiz-container');
+  c.innerHTML = QS.map((q,i)=>`
+    <div class="card" style="margin-bottom:.75rem">
+      <div style="font-size:15px;font-weight:500;margin-bottom:12px;line-height:1.5">${i+1}. "${q.q}"</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <button onclick="voteQ(${i},true)" id="btn-${i}-t" style="background:none;border:1.5px solid var(--border);border-radius:8px;padding:8px 18px;font-size:14px;cursor:pointer;transition:all .1s">👍 Testable</button>
+        <button onclick="voteQ(${i},false)" id="btn-${i}-f" style="background:none;border:1.5px solid var(--border);border-radius:8px;padding:8px 18px;font-size:14px;cursor:pointer;transition:all .1s">👎 Too vague</button>
+      </div>
+      <div id="fb-${i}" style="font-size:13px;color:var(--muted);display:none;padding:8px 12px;border-radius:7px;line-height:1.5"></div>
+    </div>`).join('');
+}
+function voteQ(i,vote) {
+  const correct = QS[i].good;
+  const fbEl = document.getElementById('fb-'+i);
+  const btnT = document.getElementById('btn-'+i+'-t');
+  const btnF = document.getElementById('btn-'+i+'-f');
+  const right = vote===correct;
+  btnT.style.background = correct ? '#E8F5EE' : (vote===true&&!correct?'#FFEBEE':'none');
+  btnT.style.borderColor = correct ? '#2E7D32' : (vote===true&&!correct?'#C62828':'var(--border)');
+  btnF.style.background = !correct ? '#E8F5EE' : (vote===false&&correct?'#FFEBEE':'none');
+  btnF.style.borderColor = !correct ? '#2E7D32' : (vote===false&&correct?'#C62828':'var(--border)');
+  fbEl.style.display = 'block';
+  fbEl.style.background = right ? '#E8F5EE' : '#FFEBEE';
+  fbEl.style.color = right ? '#1A5C22' : '#8B1515';
+  fbEl.innerHTML = (right?'✓ Correct! ':'✗ Not quite — ')+QS[i].why;
+}
+renderQuiz();
+
+// ── Variable sorting ─────────────────────────────────────────────────────────
+const SCENARIOS = [
+  {
+    text:"Does drinking energy drinks improve focus during study sessions?",
+    chips:[
+      {id:'a',label:'Energy drink vs. water',type:'iv'},
+      {id:'b',label:'Score on a focus task',type:'dv'},
+      {id:'c',label:'Same focus task for all',type:'cv'},
+      {id:'d',label:'Same study duration',type:'cv'},
+      {id:'e',label:'Same time of day',type:'cv'},
+      {id:'f',label:'Amount of caffeine in drink',type:'iv'},
+    ],
+    correct:{iv:['a'],dv:['b'],cv:['c','d','e']},
+    note:'The IV is whether participants drink energy drink or water. The DV is performance on a focus task. Note: "amount of caffeine" could be considered part of defining the IV condition, not a separate IV.'
+  },
+  {
+    text:"Does the colour of paper influence test performance?",
+    chips:[
+      {id:'a',label:'Paper colour (white vs. yellow)',type:'iv'},
+      {id:'b',label:'Test score',type:'dv'},
+      {id:'c',label:'Same test for everyone',type:'cv'},
+      {id:'d',label:'Same time limit',type:'cv'},
+      {id:'e',label:'Same room conditions',type:'cv'},
+      {id:'f',label:'Number of correct answers',type:'dv'},
+    ],
+    correct:{iv:['a'],dv:['b','f'],cv:['c','d','e']},
+    note:'Both "test score" and "number of correct answers" can be the DV — they are measuring the same thing in different ways.'
+  },
+  {
+    text:"Does using a phone before bed affect reaction time in the morning?",
+    chips:[
+      {id:'a',label:'Phone use (1hr vs. no phone)',type:'iv'},
+      {id:'b',label:'Reaction time (ms)',type:'dv'},
+      {id:'c',label:'Same reaction time test',type:'cv'},
+      {id:'d',label:'Same testing time of day',type:'cv'},
+      {id:'e',label:'Number of words recalled',type:'dv'},
+      {id:'f',label:'Sleep duration',type:'cv'},
+    ],
+    correct:{iv:['a'],dv:['b'],cv:['c','d','f']},
+    note:'"Number of words recalled" is a DV from a memory experiment — it does not belong here. The DV for this experiment is reaction time.'
+  },
+];
+let currentScenario = 0;
+let placed = {iv:[],dv:[],cv:[]};
+
+function initVarGame() {
+  const sc = SCENARIOS[currentScenario];
+  document.getElementById('vg-scenario').textContent = sc.text;
+  placed = {iv:[],dv:[],cv:[]};
+  const bank = document.getElementById('var-bank');
+  bank.innerHTML = sc.chips.map(c=>`
+    <div class="var-chip" id="chip-${c.id}" draggable="true"
+      ondragstart="event.dataTransfer.setData('chipId','${c.id}')"
+      ontouchstart="touchStart(event,'${c.id}')"
+    >${c.label}</div>`).join('');
+  ['iv','dv','cv'].forEach(z=>{ document.getElementById('zone-'+z).innerHTML=''; document.getElementById('zone-'+z).className='drag-zone'; });
+  document.getElementById('var-feedback').textContent='';
+  document.getElementById('var-feedback').className='var-feedback';
+}
+
+function dropChip(event, zone) {
+  event.preventDefault();
+  const id = event.dataTransfer.getData('chipId');
+  const chip = document.getElementById('chip-'+id);
+  if(!chip) return;
+  event.currentTarget.classList.remove('over');
+  event.currentTarget.appendChild(chip);
+  chip.className = 'var-chip placed-'+zone;
+  chip.draggable = false;
+  chip.style.cursor = 'default';
+  // Remove from old zone tracking
+  ['iv','dv','cv'].forEach(z=>{ placed[z]=placed[z].filter(x=>x!==id); });
+  placed[zone].push(id);
+}
+
+function checkVars() {
+  const sc = SCENARIOS[currentScenario];
+  const fb = document.getElementById('var-feedback');
+  let correct = true;
+  ['iv','dv','cv'].forEach(zone=>{
+    const inZone = [...document.getElementById('zone-'+zone).children].map(c=>c.id.replace('chip-',''));
+    const expected = sc.correct[zone];
+    const zoneOk = expected.every(e=>inZone.includes(e)) && inZone.every(e=>expected.includes(e));
+    if(!zoneOk) correct=false;
+  });
+  if(correct) {
+    fb.textContent='✓ Correct! '+sc.note;
+    fb.className='var-feedback pass';
+    ['iv','dv','cv'].forEach(z=>document.getElementById('zone-'+z).classList.add('correct-zone'));
+  } else {
+    fb.textContent='Not quite — check which items go in each category. Remember: the IV is what changes, the DV is what you measure, and CVs are what stay the same.';
+    fb.className='var-feedback fail';
+  }
+}
+function resetVars() { initVarGame(); }
+function nextScenario() { currentScenario=(currentScenario+1)%SCENARIOS.length; initVarGame(); }
+initVarGame();
+
+// ── Lab scenario selector ────────────────────────────────────────────────────
+function selectScenario(i) {
+  document.querySelectorAll('.scenario-chip').forEach((c,j)=>c.classList.toggle('active',j===i));
+}
+
+// ── Walkthrough accordion ─────────────────────────────────────────────────────
+function toggleWT(header) {
+  const body = header.nextElementSibling;
+  const arrow = header.querySelector('.wt-arrow');
+  const open = body.classList.toggle('open');
+  arrow.classList.toggle('open', open);
+}
+
+// ── Pitch accordion ───────────────────────────────────────────────────────────
+function togglePitch(header) {
+  header.nextElementSibling.classList.toggle('open');
+}
+
+// ── Peer feedback checkboxes ──────────────────────────────────────────────────
+const PEER_ITEMS = [
+  "The research question is specific and testable",
+  "The hypothesis uses the If…, then…, because… format correctly",
+  "The IV is clearly identified and makes sense for the question",
+  "The DV is measurable — they said how they would record it",
+  "At least two controlled variables were mentioned",
+  "They identified at least one limitation of their design",
+];
+function renderPeerFeedback() {
+  const el = document.getElementById('peer-feedback-area');
+  if(!el) return;
+  el.innerHTML = PEER_ITEMS.map((item,i)=>`
+    <div class="sc-item" style="margin-bottom:${i<PEER_ITEMS.length-1?'8px':'0'}">
+      <div class="sc-check" onclick="tick(this)"></div>
+      ${item}
+    </div>`).join('');
+}
+renderPeerFeedback();
+</script>
+</body>
+</html>
