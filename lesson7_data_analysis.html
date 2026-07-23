@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 7 — Analysing & Interpreting Data</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1B2A4A;--gold:#C9A84C;--bg:#F7F5F0;--surface:#fff;
+  --border:#E2DDD6;--text:#1A1A1A;--muted:#6B6560;--radius:10px;
+  --green:#2E7D32;--green-bg:#E8F5EE;
+  --red:#C62828;--red-bg:#FFEBEE;
+  --purple:#5B4FCC;--purple-bg:#EEEDFE;
+  --amber:#BF5000;--amber-bg:#FEF3E7;
+  --blue:#1565C0;--blue-bg:#E3F2FD;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);}
+
+/* Header */
+header{background:var(--navy);color:white;padding:1.25rem 2rem;border-bottom:3px solid var(--gold);}
+.header-inner{max-width:980px;margin:0 auto;}
+.badge{background:var(--gold);color:var(--navy);font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:6px;}
+header h1{font-size:20px;font-weight:600;}
+header p{font-size:13px;opacity:.65;margin-top:2px;}
+
+/* Phase bar */
+.phase-bar{background:var(--navy);border-bottom:1px solid rgba(255,255,255,.1);padding:.6rem 2rem;}
+.phase-inner{max-width:980px;margin:0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.phase-label{color:rgba(255,255,255,.6);font-size:13px;white-space:nowrap;}
+.phase-pills{display:flex;gap:6px;flex-wrap:wrap;}
+.phase-pill{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.2);color:white;background:rgba(255,255,255,.1);transition:all .15s;}
+.phase-pill:hover{opacity:.8;}
+.phase-pill.active{background:var(--gold);color:var(--navy);border-color:var(--gold);}
+.lesson-clock{margin-left:auto;font-size:13px;color:var(--gold);font-weight:600;}
+
+/* Nav */
+.nav-bar{background:white;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;}
+.nav-inner{max-width:980px;margin:0 auto;display:flex;overflow-x:auto;padding:0 1rem;}
+.nav-tab{background:none;border:none;border-bottom:3px solid transparent;padding:11px 16px;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap;margin-bottom:-1px;transition:color .15s,border-color .15s;}
+.nav-tab.active{color:var(--navy);border-bottom-color:var(--gold);}
+.nav-tab:hover:not(.active){color:var(--text);}
+
+main{max-width:980px;margin:0 auto;padding:1.5rem 1rem 3rem;}
+.section{display:none;}
+.section.active{display:block;}
+
+/* Generic */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.25rem;}
+.card-title{font-size:16px;font-weight:600;color:var(--navy);margin-bottom:4px;}
+.card-sub{font-size:13px;color:var(--muted);margin-bottom:1rem;}
+.time-badge{display:inline-flex;align-items:center;gap:5px;background:var(--gold);color:var(--navy);font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:12px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:600px){.two-col{grid-template-columns:1fr;}}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+@media(max-width:650px){.three-col{grid-template-columns:1fr;}}
+
+/* Hook */
+.hook{background:linear-gradient(135deg,var(--navy),#2E4070);border-radius:var(--radius);padding:1.75rem 2rem;margin-bottom:1.25rem;color:white;}
+.hook-eye{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;opacity:.6;margin-bottom:8px;}
+.hook h2{font-size:20px;font-weight:600;line-height:1.45;margin-bottom:1rem;}
+.hook-note{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:10px 14px;font-size:14px;}
+
+/* Goals / SC */
+.goals-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:560px){.goals-grid{grid-template-columns:1fr;}}
+.goal-item{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:11px 14px;font-size:14px;display:flex;gap:10px;}
+.gnum{background:var(--navy);color:white;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;margin-top:1px;}
+.sc-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:8px;}
+.sc-check{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;margin-top:1px;}
+.sc-check.checked{background:var(--navy);border-color:var(--navy);}
+.sc-check.checked::after{content:'✓';color:white;font-size:11px;}
+
+/* Steps */
+.steps-list{display:flex;flex-direction:column;gap:10px;}
+.step-item{display:flex;gap:12px;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:9px;}
+.step-num{background:var(--gold);color:var(--navy);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+.step-text h4{font-size:14px;font-weight:600;margin-bottom:3px;}
+.step-text p{font-size:13px;color:var(--muted);line-height:1.5;}
+
+/* Table vs graph compare */
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.25rem;}
+@media(max-width:600px){.compare-grid{grid-template-columns:1fr;}}
+.compare-card{border-radius:10px;border:1px solid var(--border);overflow:hidden;}
+.compare-header{padding:10px 14px;font-size:13px;font-weight:700;color:white;}
+.compare-body{padding:14px;}
+.data-tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.data-tbl th{background:var(--navy);color:white;padding:7px 10px;text-align:left;font-size:12px;}
+.data-tbl td{padding:7px 10px;border-bottom:1px solid var(--border);}
+.data-tbl tr:nth-child(even) td{background:var(--bg);}
+
+/* Vote buttons */
+.vote-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.vote-btn{flex:1;min-width:120px;background:none;border:2px solid var(--border);border-radius:9px;padding:10px 14px;font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;color:var(--text);}
+.vote-btn:hover{border-color:var(--gold);background:#FDF6E3;}
+.vote-btn.voted-graph{background:var(--green-bg);border-color:var(--green);color:var(--green);}
+.vote-btn.voted-table{background:var(--red-bg);border-color:var(--red);color:var(--red);}
+.vote-result{font-size:13px;margin-top:10px;color:var(--muted);min-height:20px;}
+
+/* Social media table */
+.sm-table{width:100%;border-collapse:collapse;font-size:14px;margin-bottom:1rem;}
+.sm-table th{background:var(--navy);color:white;padding:8px 12px;text-align:left;}
+.sm-table td{padding:8px 12px;border-bottom:1px solid var(--border);}
+.sm-table tr:nth-child(even) td{background:var(--bg);}
+.bar-cell{display:flex;align-items:center;gap:8px;}
+.bar-fill{height:14px;border-radius:3px;background:var(--gold);transition:width .4s;}
+
+/* Discussion prompts */
+.discuss-card{border-radius:9px;padding:1rem 1.25rem;margin-bottom:10px;border:1px solid;}
+.discuss-card.purple{background:var(--purple-bg);border-color:var(--purple);}
+.discuss-card.green{background:var(--green-bg);border-color:var(--green);}
+.discuss-card.amber{background:var(--amber-bg);border-color:var(--amber);}
+.discuss-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.discuss-card.purple .discuss-label{color:var(--purple);}
+.discuss-card.green  .discuss-label{color:var(--green);}
+.discuss-card.amber  .discuss-label{color:var(--amber);}
+.discuss-q{font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px;}
+.discuss-context{font-size:13px;color:var(--muted);line-height:1.55;}
+
+/* Graph builder */
+.graph-builder{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.25rem;}
+.gb-header{background:var(--navy);color:white;padding:.9rem 1.25rem;}
+.gb-header h3{font-size:15px;font-weight:600;}
+.gb-header p{font-size:12px;opacity:.65;margin-top:2px;}
+.gb-body{padding:1.25rem;}
+.gb-controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1.25rem;}
+@media(max-width:580px){.gb-controls{grid-template-columns:1fr;}}
+.gb-field label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);display:block;margin-bottom:5px;}
+.gb-field input,.gb-field select{width:100%;border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg);transition:border-color .15s;}
+.gb-field input:focus,.gb-field select:focus{outline:none;border-color:var(--gold);background:white;}
+.graph-canvas-wrap{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:1.25rem;position:relative;min-height:280px;}
+.graph-title-display{text-align:center;font-size:14px;font-weight:600;color:var(--navy);margin-bottom:1rem;}
+.bars-area{display:flex;align-items:flex-end;justify-content:center;gap:24px;height:200px;padding:0 20px;border-bottom:2px solid var(--navy);border-left:2px solid var(--navy);margin-bottom:8px;position:relative;}
+.bar-group{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;max-width:120px;}
+.bar-group .bar{width:100%;border-radius:6px 6px 0 0;transition:height .5s ease;min-height:2px;position:relative;}
+.bar-group .bar:hover .bar-tooltip{display:block;}
+.bar-tooltip{display:none;position:absolute;top:-32px;left:50%;transform:translateX(-50%);background:var(--navy);color:white;font-size:11px;padding:3px 8px;border-radius:5px;white-space:nowrap;}
+.bar-group .bar-label{font-size:12px;color:var(--muted);text-align:center;font-weight:500;}
+.y-axis-labels{position:absolute;left:-38px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:space-between;font-size:10px;color:var(--muted);text-align:right;width:35px;}
+.x-axis-label{text-align:center;font-size:12px;color:var(--muted);margin-top:4px;}
+.y-axis-label{font-size:12px;color:var(--muted);position:absolute;left:-55px;top:50%;transform:rotate(-90deg) translateX(50%);transform-origin:center center;white-space:nowrap;}
+.graph-legend{display:flex;gap:14px;justify-content:center;margin-top:10px;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);}
+.legend-dot{width:12px;height:12px;border-radius:3px;}
+
+/* Data input table */
+.data-input-table{width:100%;border-collapse:collapse;font-size:14px;margin-bottom:1rem;}
+.data-input-table th{background:var(--navy);color:white;padding:8px 10px;text-align:left;font-size:12px;font-weight:600;}
+.data-input-table td{padding:6px 8px;border-bottom:1px solid var(--border);}
+.data-input-table td input{width:100%;border:1px solid var(--border);border-radius:5px;padding:5px 8px;font-size:13px;font-family:inherit;background:var(--bg);}
+.data-input-table td input:focus{outline:none;border-color:var(--gold);background:white;}
+.data-input-table tr:nth-child(even) td{background:#FAFAF8;}
+
+/* Trend analysis */
+.trend-box{border-radius:9px;padding:1rem 1.25rem;margin-bottom:10px;border-left:4px solid;}
+.trend-box.green{background:var(--green-bg);border-color:var(--green);}
+.trend-box.amber{background:var(--amber-bg);border-color:var(--amber);}
+.trend-box.red{background:var(--red-bg);border-color:var(--red);}
+.trend-box h4{font-size:13px;font-weight:700;margin-bottom:4px;}
+.trend-box.green h4{color:var(--green);}
+.trend-box.amber h4{color:var(--amber);}
+.trend-box.red   h4{color:var(--red);}
+.trend-box p{font-size:13px;color:var(--text);line-height:1.5;}
+
+/* Peer review */
+.peer-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.25rem;}
+.peer-header{background:linear-gradient(135deg,#2E4070,var(--navy));color:white;padding:.9rem 1.25rem;}
+.peer-header h3{font-size:15px;font-weight:600;}
+.peer-header p{font-size:12px;opacity:.65;margin-top:2px;}
+.peer-body{padding:1.25rem;}
+.peer-checklist{display:flex;flex-direction:column;gap:8px;}
+.peer-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:14px;}
+.peer-select{border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px;background:white;color:var(--text);cursor:pointer;}
+
+/* Writing */
+.writing-prompt{background:linear-gradient(135deg,var(--navy),#2E4070);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1rem;color:white;}
+.wp-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;opacity:.6;margin-bottom:8px;}
+.wp-q{font-size:17px;font-weight:600;line-height:1.45;}
+.writing-field{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:12px 14px;font-size:14px;font-family:inherit;color:var(--text);background:var(--surface);resize:vertical;min-height:90px;transition:border-color .15s;}
+.writing-field:focus{outline:none;border-color:var(--gold);}
+.starter-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:.75rem;}
+.starter{font-size:13px;padding:5px 12px;border-radius:20px;background:var(--amber-bg);border:1px solid var(--amber);color:var(--amber);cursor:pointer;transition:opacity .15s;}
+.starter:hover{opacity:.75;}
+
+/* TPS */
+.tps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem;}
+@media(max-width:560px){.tps-grid{grid-template-columns:1fr;}}
+.tps-card{border-radius:10px;padding:1.1rem;}
+.tps-card.think{background:#E8EEF7;border:1px solid var(--navy);}
+.tps-card.pair{background:var(--green-bg);border:1px solid var(--green);}
+.tps-card.share{background:var(--amber-bg);border:1px solid var(--amber);}
+.tps-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.tps-card.think .tps-label{color:var(--navy);}
+.tps-card.pair  .tps-label{color:var(--green);}
+.tps-card.share .tps-label{color:var(--amber);}
+.tps-card h4{font-size:14px;font-weight:600;margin-bottom:4px;}
+.tps-card p{font-size:13px;color:var(--muted);line-height:1.5;}
+
+/* Countdown */
+.countdown-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+.cd-display{font-size:38px;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums;min-width:90px;}
+.cd-display.urgent{color:var(--red);}
+.cd-label{font-size:12px;color:var(--muted);margin-top:2px;}
+.t-btn{background:var(--navy);color:white;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;transition:opacity .15s;}
+.t-btn:hover{opacity:.85;}
+.t-btn.ghost{background:none;color:var(--navy);border:1px solid var(--border);}
+.t-btn.ghost:hover{background:var(--bg);}
+.timer-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.presets{display:flex;gap:6px;flex-wrap:wrap;}
+.preset{background:none;border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--muted);cursor:pointer;transition:all .1s;}
+.preset:hover{background:var(--bg);color:var(--text);}
+
+/* Graph type cards */
+.graph-types{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem;}
+@media(max-width:600px){.graph-types{grid-template-columns:1fr;}}
+.gt-card{border-radius:10px;padding:1.1rem;border:2px solid var(--border);cursor:pointer;transition:all .15s;}
+.gt-card:hover{border-color:var(--gold);background:#FDF6E3;}
+.gt-card.active{border-color:var(--navy);background:#E8EEF7;}
+.gt-icon{font-size:28px;margin-bottom:6px;}
+.gt-name{font-size:14px;font-weight:600;color:var(--navy);margin-bottom:4px;}
+.gt-use{font-size:13px;color:var(--muted);line-height:1.4;}
+.gt-when{font-size:12px;margin-top:6px;padding:4px 8px;border-radius:5px;background:var(--amber-bg);color:var(--amber);font-weight:600;}
+
+/* Accordion */
+.accordion-item{background:var(--surface);border:1px solid var(--border);border-radius:9px;margin-bottom:8px;overflow:hidden;}
+.accordion-header{padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;}
+.accordion-icon{font-size:18px;flex-shrink:0;}
+.accordion-title{font-size:14px;font-weight:600;color:var(--navy);flex:1;}
+.accordion-arrow{color:var(--muted);transition:transform .2s;}
+.accordion-arrow.open{transform:rotate(180deg);}
+.accordion-body{padding:14px 16px;border-top:1px solid var(--border);display:none;font-size:14px;line-height:1.6;color:var(--text);}
+.accordion-body.open{display:block;}
+.accordion-body p{margin-bottom:8px;}
+.accordion-body p:last-child{margin-bottom:0;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.section.active>*{animation:fadeUp .22s ease both;}
+</style>
+</head>
+<body>
+
+<header>
+<div class="header-inner">
+  <div class="badge">Year 9 Psychology · Lesson 7 · 70 minutes</div>
+  <h1>Analysing & Interpreting Data</h1>
+  <p>Graphs, trends, anomalies, and what your data is actually telling you</p>
+</div>
+</header>
+
+<div class="phase-bar">
+<div class="phase-inner">
+  <span class="phase-label">Phase:</span>
+  <div class="phase-pills">
+    <div class="phase-pill active" onclick="setPhase(0)">📊 Hook (0–10 min)</div>
+    <div class="phase-pill" onclick="setPhase(1)">📋 Teach (10–25 min)</div>
+    <div class="phase-pill" onclick="setPhase(2)">🎨 Graph It (25–50 min)</div>
+    <div class="phase-pill" onclick="setPhase(3)">👥 Peer Review (50–62 min)</div>
+    <div class="phase-pill" onclick="setPhase(4)">💭 Exit (62–70 min)</div>
+  </div>
+  <span class="lesson-clock" id="lesson-clock">⏱ 70:00</span>
+</div>
+</div>
+
+<nav class="nav-bar">
+<div class="nav-inner">
+  <button class="nav-tab active" onclick="show('overview')">Overview</button>
+  <button class="nav-tab" onclick="show('hook')">Hook</button>
+  <button class="nav-tab" onclick="show('teach')">Teach</button>
+  <button class="nav-tab" onclick="show('graph')">Graph It</button>
+  <button class="nav-tab" onclick="show('peer')">Peer Review</button>
+  <button class="nav-tab" onclick="show('exit')">Exit Ticket</button>
+</div>
+</nav>
+
+<main>
+
+<!-- ══ OVERVIEW ══════════════════════════════════════════════════════════════ -->
+<div class="section active" id="s-overview">
+
+  <div class="card">
+    <div class="card-title">📋 Lesson at a Glance — 70 minutes</div>
+    <div class="card-sub">Five phases — use the phase bar above to track timing.</div>
+    <div class="steps-list">
+      <div class="step-item"><div class="step-num">1</div><div class="step-text"><h4>📊 Hook — 10 min</h4><p>Table vs. graph challenge: students vote on which format is easier to read. Then explore social media usage data — what trends can you spot?</p></div></div>
+      <div class="step-item"><div class="step-num">2</div><div class="step-text"><h4>📋 Teach — 15 min</h4><p>When to use which graph type. How to label axes, choose scales, and spot trends vs. anomalies. Interactive accordion walkthroughs.</p></div></div>
+      <div class="step-item"><div class="step-num">3</div><div class="step-text"><h4>🎨 Graph It — 25 min</h4><p>Students enter their Lesson 6 memory recall data into the built-in graph builder. The graph updates live. Then write a trend analysis underneath.</p></div></div>
+      <div class="step-item"><div class="step-num">4</div><div class="step-text"><h4>👥 Peer Review — 12 min</h4><p>Pairs compare graphs, identify trends and anomalies, and complete a structured peer review checklist.</p></div></div>
+      <div class="step-item"><div class="step-num">5</div><div class="step-text"><h4>💭 Exit Ticket — 8 min</h4><p>Think-Pair-Share: "How does a graph help us draw conclusions from data?"</p></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📚 Learning Goals</div>
+    <div class="card-sub">By the end of this lesson you will be able to:</div>
+    <div class="goals-grid">
+      <div class="goal-item"><div class="gnum">1</div>Analyse experimental data to identify trends and anomalies.</div>
+      <div class="goal-item"><div class="gnum">2</div>Summarise findings clearly using an appropriate graph type.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">✅ Success Criteria</div>
+    <div class="card-sub">Tick each one as you feel confident:</div>
+    <div class="sc-item"><div class="sc-check" onclick="tick(this)"></div>I can choose the right type of graph for my data.</div>
+    <div class="sc-item"><div class="sc-check" onclick="tick(this)"></div>I can correctly label axes, add a title, and use an appropriate scale.</div>
+    <div class="sc-item" style="margin-bottom:0"><div class="sc-check" onclick="tick(this)"></div>I can identify at least one trend and one anomaly in a dataset.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📖 Resources</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px">
+      <div style="flex:1;min-width:180px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:14px"><strong>📕 Textbook</strong><br><span style="color:var(--muted);font-size:13px">Cambridge Get Psyched! — Data Analysis Section</span></div>
+      <div style="flex:1;min-width:180px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:14px"><strong>📊 Graph Builder</strong><br><span style="color:var(--muted);font-size:13px">Built into the Graph It tab — no Excel needed</span></div>
+      <div style="flex:1;min-width:180px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:14px"><strong>📋 Lesson 6 Data</strong><br><span style="color:var(--muted);font-size:13px">Use the memory recall scores you collected last lesson</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HOOK ═══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s-hook">
+  <div class="time-badge">⏱ 10 minutes</div>
+
+  <div class="hook">
+    <div class="hook-eye">📊 Lesson Hook</div>
+    <h2>"What can a graph tell us that a table can't?"</h2>
+    <div class="hook-note">👀 <em>Look at both versions of the same data below — then vote on which one makes the trends clearer.</em></div>
+  </div>
+
+  <!-- Table vs Graph -->
+  <div class="compare-grid">
+    <div class="compare-card">
+      <div class="compare-header" style="background:var(--red)">❌ Cluttered Data Table</div>
+      <div class="compare-body">
+        <table class="data-tbl">
+          <thead><tr><th>P</th><th>Condition</th><th>Words</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>P1</td><td>Silence</td><td>10</td><td></td></tr>
+            <tr><td>P2</td><td>Music</td><td>7</td><td></td></tr>
+            <tr><td>P3</td><td>Silence</td><td>8</td><td></td></tr>
+            <tr><td>P4</td><td>Music</td><td>9</td><td style="color:var(--red);font-size:12px">Missing notes</td></tr>
+            <tr><td>P5</td><td>Silence</td><td>12</td><td></td></tr>
+            <tr><td>P6</td><td>Music</td><td>10</td><td></td></tr>
+            <tr><td>P7</td><td>Silence</td><td>9</td><td></td></tr>
+            <tr><td>P8</td><td>Music</td><td>8</td><td style="color:var(--red);font-size:12px">Incomplete</td></tr>
+            <tr><td>P9</td><td>Silence</td><td>11</td><td></td></tr>
+            <tr><td>P10</td><td>Music</td><td>6</td><td></td></tr>
+          </tbody>
+        </table>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px">Can you tell at a glance which group recalled more words?</div>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-header" style="background:var(--green)">✅ Clear Bar Graph</div>
+      <div class="compare-body">
+        <div style="background:var(--bg);border-radius:8px;padding:1rem;">
+          <div style="text-align:center;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:12px">Memory Recall: Silence vs Music</div>
+          <div style="display:flex;align-items:flex-end;justify-content:center;gap:30px;height:160px;border-left:2px solid var(--navy);border-bottom:2px solid var(--navy);padding:0 20px;position:relative;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <div style="background:#1B2A4A;width:60px;height:128px;border-radius:5px 5px 0 0;position:relative">
+                <div style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:700;color:var(--navy)">10.0</div>
+              </div>
+              <div style="font-size:12px;font-weight:600;color:var(--muted)">Silence</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <div style="background:var(--gold);width:60px;height:102px;border-radius:5px 5px 0 0;position:relative">
+                <div style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:700;color:var(--navy)">8.0</div>
+              </div>
+              <div style="font-size:12px;font-weight:600;color:var(--muted)">Music</div>
+            </div>
+          </div>
+          <div style="text-align:center;font-size:12px;color:var(--muted);margin-top:6px">Average Words Recalled</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px">Which group performed better? How long did it take you to see it?</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🗳️ Class Vote</div>
+    <div class="card-sub">Which format makes the trend clearer?</div>
+    <div class="vote-row">
+      <button class="vote-btn" id="vote-graph" onclick="castVote('graph')">📊 The bar graph — much easier</button>
+      <button class="vote-btn" id="vote-table" onclick="castVote('table')">📋 The table — I can read numbers fine</button>
+    </div>
+    <div class="vote-result" id="vote-result"></div>
+  </div>
+
+  <!-- Social media data -->
+  <div class="card">
+    <div class="card-title">📱 Real Data — Social Media Usage by Age Group</div>
+    <div class="card-sub">Look at this data and answer the three questions below before the class discussion.</div>
+    <table class="sm-table">
+      <thead><tr><th>Age Group</th><th>Avg Daily Usage (hrs)</th><th>Visual</th></tr></thead>
+      <tbody>
+        <tr><td>13–17</td><td>3.5</td><td><div class="bar-cell"><div class="bar-fill" style="width:200px;background:#C62828;"></div><span style="font-size:12px;color:var(--muted)">3.5h</span></div></td></tr>
+        <tr><td>18–24</td><td>4.2</td><td><div class="bar-cell"><div class="bar-fill" style="width:240px;background:#BF5000;"></div><span style="font-size:12px;color:var(--muted)">4.2h ▲ peak</span></div></td></tr>
+        <tr><td>25–34</td><td>3.1</td><td><div class="bar-cell"><div class="bar-fill" style="width:177px;background:#C9A84C;"></div><span style="font-size:12px;color:var(--muted)">3.1h</span></div></td></tr>
+        <tr><td>35–44</td><td>2.7</td><td><div class="bar-cell"><div class="bar-fill" style="width:154px;background:#2E7D32;"></div><span style="font-size:12px;color:var(--muted)">2.7h</span></div></td></tr>
+        <tr><td>45–54</td><td>2.0</td><td><div class="bar-cell"><div class="bar-fill" style="width:114px;background:#1565C0;"></div><span style="font-size:12px;color:var(--muted)">2.0h</span></div></td></tr>
+        <tr><td>55+</td><td>1.5</td><td><div class="bar-cell"><div class="bar-fill" style="width:86px;background:#5B4FCC;"></div><span style="font-size:12px;color:var(--muted)">1.5h</span></div></td></tr>
+      </tbody>
+    </table>
+
+    <div class="discuss-card purple" style="margin-bottom:8px">
+      <div class="discuss-label">📊 Trend question</div>
+      <div class="discuss-q">Which age group uses social media most, and what pattern do you notice across age groups?</div>
+      <textarea class="writing-field" id="hook-q1" rows="2" placeholder="Type your observation…" style="margin-top:8px"></textarea>
+    </div>
+    <div class="discuss-card green" style="margin-bottom:8px">
+      <div class="discuss-label">🧠 Psychology connection</div>
+      <div class="discuss-q">What psychological effects might 4+ hours of daily social media use have on an 18–24 year old? Think back to what we know about stress, attention, and peer influence.</div>
+      <textarea class="writing-field" id="hook-q2" rows="2" placeholder="Type your thoughts…" style="margin-top:8px"></textarea>
+    </div>
+    <div class="discuss-card amber">
+      <div class="discuss-label">💬 Personal reflection</div>
+      <div class="discuss-q">Have you ever noticed social media affecting your mood or focus? What does the data above tell you about your own usage patterns?</div>
+      <textarea class="writing-field" id="hook-q3" rows="2" placeholder="Type your reflection…" style="margin-top:8px"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TEACH ══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s-teach">
+  <div class="time-badge">⏱ 15 minutes</div>
+
+  <div class="card">
+    <div class="card-title">📊 Choosing the Right Graph Type</div>
+    <div class="card-sub">Different data needs different graphs. Click each type to see when to use it and why.</div>
+    <div class="graph-types">
+      <div class="gt-card active" onclick="selectGraphType(this)">
+        <div class="gt-icon">📊</div>
+        <div class="gt-name">Bar Graph</div>
+        <div class="gt-use">Compares values between distinct categories (e.g. silence vs music group averages).</div>
+        <div class="gt-when">✓ Use this for our memory recall data</div>
+      </div>
+      <div class="gt-card" onclick="selectGraphType(this)">
+        <div class="gt-icon">📈</div>
+        <div class="gt-name">Line Graph</div>
+        <div class="gt-use">Shows how a value changes over time (e.g. tracking social media usage year by year).</div>
+        <div class="gt-when">✓ Use when time is on the x-axis</div>
+      </div>
+      <div class="gt-card" onclick="selectGraphType(this)">
+        <div class="gt-icon">🥧</div>
+        <div class="gt-name">Pie Chart</div>
+        <div class="gt-use">Shows proportions of a whole (e.g. percentage of participants in each condition).</div>
+        <div class="gt-when">⚠ Avoid for comparing group scores</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🏷️ The Four Rules of a Good Graph</div>
+    <div class="card-sub">Every graph you create must have all four. Click each one to expand the detail.</div>
+    <div class="accordion-item">
+      <div class="accordion-header" onclick="toggleAcc(this)">
+        <div class="accordion-icon">📌</div>
+        <div class="accordion-title">Rule 1 — Descriptive Title</div>
+        <div class="accordion-arrow">▼</div>
+      </div>
+      <div class="accordion-body">
+        <p>Your title must describe what is being compared. It should mention the IV and DV.</p>
+        <p><strong>❌ Bad:</strong> "Memory Results"<br><strong>✓ Good:</strong> "Effect of Background Music on the Number of Words Recalled"</p>
+        <p>A reader should understand the experiment just by reading the title — without seeing any other context.</p>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <div class="accordion-header" onclick="toggleAcc(this)">
+        <div class="accordion-icon">📏</div>
+        <div class="accordion-title">Rule 2 — Labelled Axes</div>
+        <div class="accordion-arrow">▼</div>
+      </div>
+      <div class="accordion-body">
+        <p><strong>X-axis (horizontal):</strong> always the Independent Variable — what was changed (e.g. Condition: Silence or Music).</p>
+        <p><strong>Y-axis (vertical):</strong> always the Dependent Variable — what was measured (e.g. Number of Words Recalled).</p>
+        <p>Include units where relevant (e.g. "Words Recalled (out of 10)" or "Time (seconds)").</p>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <div class="accordion-header" onclick="toggleAcc(this)">
+        <div class="accordion-icon">📐</div>
+        <div class="accordion-title">Rule 3 — Appropriate Scale</div>
+        <div class="accordion-arrow">▼</div>
+      </div>
+      <div class="accordion-body">
+        <p>Your y-axis scale must start at 0 (unless there is a very good reason not to) and go slightly above your highest data point.</p>
+        <p><strong>Example:</strong> If your highest score is 12, scale from 0 to 15 in steps of 3. Don't use 0–100 for data that only reaches 12 — it makes differences look tiny.</p>
+        <p>Keep intervals consistent — if you use steps of 2, use 2 all the way up.</p>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <div class="accordion-header" onclick="toggleAcc(this)">
+        <div class="accordion-icon">🔍</div>
+        <div class="accordion-title">Rule 4 — Identifying Trends and Anomalies</div>
+        <div class="accordion-arrow">▼</div>
+      </div>
+      <div class="accordion-body">
+        <p><strong>Trend:</strong> a general pattern across your data. Example: "Participants in the silence condition recalled more words on average than those in the music condition."</p>
+        <p><strong>Anomaly:</strong> a data point that doesn't fit the trend. Example: "Participant 4 in the music condition recalled 9 words — more than the silence group average — which is unexpected."</p>
+        <p>Anomalies are not "mistakes" — they may reveal something interesting about individual differences, or they may indicate a data collection error from Lesson 6.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ GRAPH IT ════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s-graph">
+  <div class="time-badge">⏱ 25 minutes</div>
+
+  <div class="countdown-wrap">
+    <div>
+      <div class="cd-display" id="graph-timer">25:00</div>
+      <div class="cd-label">Activity timer</div>
+    </div>
+    <div>
+      <div class="timer-btns" style="margin-bottom:8px">
+        <button class="t-btn" onclick="startG()">▶ Start</button>
+        <button class="t-btn ghost" onclick="pauseG()">⏸ Pause</button>
+        <button class="t-btn ghost" onclick="resetG()">↺ Reset</button>
+      </div>
+      <div class="presets">
+        <button class="preset" onclick="setG(10)">10 min</button>
+        <button class="preset" onclick="setG(15)">15 min</button>
+        <button class="preset" onclick="setG(20)">20 min</button>
+        <button class="preset" onclick="setG(25)">25 min</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📥 Step 1 — Enter Your Data</div>
+    <div class="card-sub">Enter the word recall scores from your Lesson 6 experiment. Select the condition for each participant, then enter their score. The graph updates automatically.</div>
+    <table class="data-input-table" id="data-input-tbl">
+      <thead><tr><th>Participant</th><th>Condition</th><th>Words Recalled (0–10)</th></tr></thead>
+      <tbody id="data-input-body"></tbody>
+    </table>
+    <button onclick="updateGraph()" style="background:var(--navy);color:white;border:none;border-radius:8px;padding:9px 20px;font-size:14px;font-weight:500;cursor:pointer;margin-top:4px">📊 Update graph</button>
+  </div>
+
+  <!-- Live graph builder -->
+  <div class="graph-builder">
+    <div class="gb-header">
+      <h3>📊 Live Graph Builder</h3>
+      <p>Customise the title and axis labels — the graph updates as you type</p>
+    </div>
+    <div class="gb-body">
+      <div class="gb-controls">
+        <div class="gb-field"><label>Graph Title</label><input id="g-title" value="Effect of Background Music on Memory Recall" oninput="updateGraphMeta()"></div>
+        <div class="gb-field"><label>X-Axis Label</label><input id="g-xlabel" value="Condition" oninput="updateGraphMeta()"></div>
+        <div class="gb-field"><label>Y-Axis Label</label><input id="g-ylabel" value="Average Words Recalled" oninput="updateGraphMeta()"></div>
+      </div>
+
+      <div class="graph-canvas-wrap">
+        <div class="graph-title-display" id="g-title-display">Effect of Background Music on Memory Recall</div>
+        <div style="position:relative;padding-left:48px;">
+          <div class="y-axis-label" id="g-ylabel-display">Average Words Recalled</div>
+          <div style="position:relative">
+            <div class="y-axis-labels" id="y-labels"></div>
+            <div class="bars-area" id="bars-area">
+              <div class="bar-group" id="bar-silence">
+                <div class="bar" id="bar-s" style="background:#1B2A4A;height:0px;width:80px">
+                  <div class="bar-tooltip" id="tt-s">—</div>
+                </div>
+                <div class="bar-label">Silence</div>
+              </div>
+              <div class="bar-group" id="bar-music">
+                <div class="bar" id="bar-m" style="background:#C9A84C;height:0px;width:80px">
+                  <div class="bar-tooltip" id="tt-m">—</div>
+                </div>
+                <div class="bar-label">Music</div>
+              </div>
+            </div>
+          </div>
+          <div class="x-axis-label" id="g-xlabel-display">Condition</div>
+        </div>
+        <div class="graph-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#1B2A4A"></div>Silence group</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#C9A84C"></div>Music group</div>
+        </div>
+      </div>
+
+      <!-- Averages display -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:1rem">
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:6px">Silence Avg</div>
+          <div style="font-size:28px;font-weight:700;color:var(--navy)" id="disp-silence">—</div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:6px">Music Avg</div>
+          <div style="font-size:28px;font-weight:700;color:#C9A84C" id="disp-music">—</div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:6px">Difference</div>
+          <div style="font-size:28px;font-weight:700;color:var(--green)" id="disp-diff">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trend analysis writing -->
+  <div class="card">
+    <div class="card-title">✍️ Step 2 — Written Analysis</div>
+    <div class="card-sub">Use your graph to write your findings. Cover all three boxes.</div>
+    <div class="trend-box green" style="margin-bottom:10px">
+      <h4>📈 Trend</h4>
+      <p>What overall pattern does your graph show? Which group recalled more words on average?</p>
+      <textarea class="writing-field" id="trend-q1" rows="2" placeholder="e.g. The graph shows that participants in the silence condition recalled more words on average than those in the music condition…" style="margin-top:8px"></textarea>
+    </div>
+    <div class="trend-box amber" style="margin-bottom:10px">
+      <h4>⚠️ Anomaly</h4>
+      <p>Is there any data point that doesn't fit the trend? What might explain it?</p>
+      <textarea class="writing-field" id="trend-q2" rows="2" placeholder="e.g. Participant 4 in the music group scored unusually high — this could be because they were already familiar with the word list or were less distracted by the music…" style="margin-top:8px"></textarea>
+    </div>
+    <div class="trend-box red">
+      <h4>🧠 Conclusion</h4>
+      <p>Does your data support your hypothesis from Lesson 5? Explain why or why not.</p>
+      <textarea class="writing-field" id="trend-q3" rows="2" placeholder="e.g. Our data supports the hypothesis that music reduces memory recall because the silence group averaged X words compared to Y in the music group…" style="margin-top:8px"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PEER REVIEW ════════════════════════════════════════════════════════════ -->
+<div class="section" id="s-peer">
+  <div class="time-badge">⏱ 12 minutes — pair activity</div>
+
+  <div class="peer-card">
+    <div class="peer-header">
+      <h3>👥 Peer Graph Review</h3>
+      <p>Swap devices with your partner and assess their graph using the checklist below</p>
+    </div>
+    <div class="peer-body">
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:1rem;font-size:14px">
+        <strong>Reviewer's name:</strong>
+        <input id="reviewer-name" placeholder="Enter your name…" style="border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:14px;font-family:inherit;margin-left:10px;width:200px;">
+      </div>
+
+      <div class="peer-checklist">
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px;display:grid;grid-template-columns:1fr 80px;gap:8px"><span>Criteria</span><span style="text-align:center">Rating</span></div>
+        <div class="peer-item"><span style="flex:1">The graph has a clear, descriptive title that mentions both IV and DV</span><select class="peer-select" id="pr1"><option value="">—</option><option>✓ Yes</option><option>~ Partial</option><option>✗ No</option></select></div>
+        <div class="peer-item"><span style="flex:1">X-axis is labelled with the IV and includes the two conditions</span><select class="peer-select" id="pr2"><option value="">—</option><option>✓ Yes</option><option>~ Partial</option><option>✗ No</option></select></div>
+        <div class="peer-item"><span style="flex:1">Y-axis is labelled with the DV and uses an appropriate scale starting at 0</span><select class="peer-select" id="pr3"><option value="">—</option><option>✓ Yes</option><option>~ Partial</option><option>✗ No</option></select></div>
+        <div class="peer-item"><span style="flex:1">The graph clearly shows which group recalled more words</span><select class="peer-select" id="pr4"><option value="">—</option><option>✓ Yes</option><option>~ Partial</option><option>✗ No</option></select></div>
+        <div class="peer-item"><span style="flex:1">A trend is identified in the written analysis</span><select class="peer-select" id="pr5"><option value="">—</option><option>✓ Yes</option><option>~ Partial</option><option>✗ No</option></select></div>
+        <div class="peer-item"><span style="flex:1">At least one anomaly is discussed (or the student notes there are none)</span><select class="peer-select" id="pr6"><option value="">—</option><option>✓ Yes</option><option>~ Partial</option><option>✗ No</option></select></div>
+        <div class="peer-item"><span style="flex:1">The conclusion links back to the hypothesis from Lesson 5</span><select class="peer-select" id="pr7"><option value="">—</option><option>✓ Yes</option><option>~ Partial</option><option>✗ No</option></select></div>
+      </div>
+
+      <div style="margin-top:1.25rem">
+        <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:6px">One thing that's strong about this graph:</div>
+        <textarea class="writing-field" id="peer-strength" rows="2" placeholder="e.g. The title is very specific and clearly names both the IV and DV…"></textarea>
+      </div>
+      <div style="margin-top:12px">
+        <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:6px">One suggestion for improvement:</div>
+        <textarea class="writing-field" id="peer-improve" rows="2" placeholder="e.g. The y-axis scale could go up to 12 instead of 10 to give more room above the highest bar…"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🎤 Mini-Presentation — 60 seconds each</div>
+    <div class="card-sub">Each pair briefly shares one observation from their graph comparison. Use this structure:</div>
+    <div class="steps-list">
+      <div class="step-item"><div class="step-num">1</div><div class="step-text"><h4>Name the trend</h4><p>"Our graph shows that…"</p></div></div>
+      <div class="step-item"><div class="step-num">2</div><div class="step-text"><h4>Name an anomaly (if any)</h4><p>"One unexpected result was…"</p></div></div>
+      <div class="step-item"><div class="step-num">3</div><div class="step-text"><h4>Link to hypothesis</h4><p>"This [supports / does not support] our hypothesis because…"</p></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EXIT ═══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s-exit">
+  <div class="time-badge">⏱ 8 minutes</div>
+
+  <div class="writing-prompt">
+    <div class="wp-label">💭 Exit Ticket — Think-Pair-Share</div>
+    <div class="wp-q">"How does a graph help us draw conclusions from experimental data?"</div>
+  </div>
+
+  <div class="tps-grid">
+    <div class="tps-card think">
+      <div class="tps-label">Step 1 — Think (2 min)</div>
+      <h4>Write individually</h4>
+      <p>Answer the question before talking to anyone.</p>
+    </div>
+    <div class="tps-card pair">
+      <div class="tps-label">Step 2 — Pair (2 min)</div>
+      <h4>Discuss</h4>
+      <p>Share your answer. What did your partner add?</p>
+    </div>
+    <div class="tps-card share">
+      <div class="tps-label">Step 3 — Share (4 min)</div>
+      <h4>Class discussion</h4>
+      <p>Volunteers share the most important ideas.</p>
+    </div>
+  </div>
+
+  <textarea class="writing-field" id="exit-response" style="margin-bottom:1.25rem" placeholder="Write your individual response here — think about: What would be harder to see if you only had a table? How does a graph help identify trends and anomalies? Think of an example from today's lesson…"></textarea>
+
+  <div class="card">
+    <div class="card-title">✅ Final Self-Check</div>
+    <div class="card-sub">Before you leave — tick each one if you feel confident:</div>
+    <div class="sc-item"><div class="sc-check" onclick="tick(this)"></div>I can explain when to use a bar graph vs a line graph.</div>
+    <div class="sc-item"><div class="sc-check" onclick="tick(this)"></div>I correctly labelled the axes of my graph with the IV and DV.</div>
+    <div class="sc-item"><div class="sc-check" onclick="tick(this)"></div>I can describe a trend in my data using the word "average."</div>
+    <div class="sc-item" style="margin-bottom:0"><div class="sc-check" onclick="tick(this)"></div>I can explain what an anomaly is and suggest a reason for it.</div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ── Nav ────────────────────────────────────────────────────────────────────
+const TABS=['overview','hook','teach','graph','peer','exit'];
+function show(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('s-'+id).classList.add('active');
+  document.querySelectorAll('.nav-tab')[TABS.indexOf(id)].classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function tick(el){el.classList.toggle('checked');}
+
+// ── Phase pills ────────────────────────────────────────────────────────────
+const PHASE_MAP=['overview','hook','teach','graph','peer','exit'];
+function setPhase(i){
+  document.querySelectorAll('.phase-pill').forEach((p,j)=>p.classList.toggle('active',j===i));
+  show(PHASE_MAP[i+1]||PHASE_MAP[i]);
+}
+
+// ── Lesson clock ──────────────────────────────────────────────────────────
+let lessonSecs=70*60,lessonInterval;
+function startLessonClock(){
+  lessonInterval=setInterval(()=>{
+    if(lessonSecs<=0){clearInterval(lessonInterval);return;}
+    lessonSecs--;
+    const m=Math.floor(lessonSecs/60),s=lessonSecs%60;
+    document.getElementById('lesson-clock').textContent=`⏱ ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  },1000);
+}
+
+// ── Activity timer ─────────────────────────────────────────────────────────
+let gSecs=25*60,gRunning=false,gInterval;
+function renderG(){
+  const m=Math.floor(gSecs/60),s=gSecs%60;
+  const el=document.getElementById('graph-timer');
+  if(!el)return;
+  el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  el.className='cd-display'+(gSecs<=60?' urgent':'');
+}
+function startG(){if(gRunning)return;gRunning=true;gInterval=setInterval(()=>{if(gSecs<=0){clearInterval(gInterval);gRunning=false;return;}gSecs--;renderG();},1000);}
+function pauseG(){clearInterval(gInterval);gRunning=false;}
+function resetG(){clearInterval(gInterval);gRunning=false;gSecs=25*60;renderG();}
+function setG(m){clearInterval(gInterval);gRunning=false;gSecs=m*60;renderG();}
+
+// ── Vote ───────────────────────────────────────────────────────────────────
+let votes={graph:0,table:0};
+function castVote(t){
+  votes[t]++;
+  document.getElementById('vote-graph').className='vote-btn'+(t==='graph'?' voted-graph':'');
+  document.getElementById('vote-table').className='vote-btn'+(t==='table'?' voted-table':'');
+  const total=votes.graph+votes.table;
+  const pct=Math.round((votes.graph/total)*100);
+  document.getElementById('vote-result').textContent=`Class result: ${pct}% said the graph is clearer — and research agrees. Graphs reduce cognitive load, making patterns visible at a glance.`;
+}
+
+// ── Graph types ────────────────────────────────────────────────────────────
+function selectGraphType(card){
+  document.querySelectorAll('.gt-card').forEach(c=>c.classList.remove('active'));
+  card.classList.add('active');
+}
+
+// ── Accordion ──────────────────────────────────────────────────────────────
+function toggleAcc(header){
+  const body=header.nextElementSibling;
+  const arrow=header.querySelector('.accordion-arrow');
+  const open=body.classList.toggle('open');
+  arrow.classList.toggle('open',open);
+}
+
+// ── Data input table ───────────────────────────────────────────────────────
+function buildDataInput(){
+  const tbody=document.getElementById('data-input-body');
+  if(!tbody)return;
+  tbody.innerHTML=[...Array(10)].map((_,i)=>`
+    <tr>
+      <td style="font-weight:600;color:var(--muted);width:80px">P${i+1}</td>
+      <td><select id="di-cond-${i}" onchange="updateGraph()" style="border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:13px;background:var(--bg);font-family:inherit;">
+        <option value="">— select —</option>
+        <option value="silence">Silence</option>
+        <option value="music">Music</option>
+      </select></td>
+      <td><input type="number" id="di-score-${i}" min="0" max="10" placeholder="0–10" onchange="updateGraph()" style="width:90px;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:13px;background:var(--bg);font-family:inherit;"></td>
+    </tr>`).join('');
+}
+
+// ── Live graph ─────────────────────────────────────────────────────────────
+function updateGraph(){
+  let silVals=[],musVals=[];
+  for(let i=0;i<10;i++){
+    const cond=document.getElementById('di-cond-'+i)?.value;
+    const val=parseFloat(document.getElementById('di-score-'+i)?.value);
+    if(!isNaN(val)&&val>=0){
+      if(cond==='silence') silVals.push(val);
+      if(cond==='music')   musVals.push(val);
+    }
+  }
+  const avg=arr=>arr.length?(arr.reduce((a,b)=>a+b,0)/arr.length):null;
+  const silAvg=avg(silVals), musAvg=avg(musVals);
+  const maxVal=Math.max(silAvg||0,musAvg||0,1);
+  const scale=Math.ceil(maxVal/5)*5+2;
+  const maxH=180;
+
+  const bS=document.getElementById('bar-s');
+  const bM=document.getElementById('bar-m');
+  if(bS) bS.style.height=silAvg!==null?Math.round((silAvg/scale)*maxH)+'px':'2px';
+  if(bM) bM.style.height=musAvg!==null?Math.round((musAvg/scale)*maxH)+'px':'2px';
+
+  const ttS=document.getElementById('tt-s');
+  const ttM=document.getElementById('tt-m');
+  if(ttS) ttS.textContent=silAvg!==null?`Avg: ${silAvg.toFixed(1)}`:'No data';
+  if(ttM) ttM.textContent=musAvg!==null?`Avg: ${musAvg.toFixed(1)}`:'No data';
+
+  // Y-axis labels
+  const yLabels=document.getElementById('y-labels');
+  if(yLabels){
+    const steps=5;
+    yLabels.innerHTML=[...Array(steps+1)].map((_,i)=>{
+      const v=Math.round((scale/steps)*(steps-i));
+      return `<span>${v}</span>`;
+    }).join('');
+  }
+
+  // Display averages
+  document.getElementById('disp-silence').textContent=silAvg!==null?silAvg.toFixed(1):'—';
+  document.getElementById('disp-music').textContent=musAvg!==null?musAvg.toFixed(1):'—';
+  if(silAvg!==null&&musAvg!==null){
+    const diff=(silAvg-musAvg).toFixed(1);
+    document.getElementById('disp-diff').textContent=(diff>0?'+':'')+diff;
+  } else {
+    document.getElementById('disp-diff').textContent='—';
+  }
+  saveAll();
+}
+
+function updateGraphMeta(){
+  const title=document.getElementById('g-title')?.value||'';
+  const xl=document.getElementById('g-xlabel')?.value||'';
+  const yl=document.getElementById('g-ylabel')?.value||'';
+  const td=document.getElementById('g-title-display');
+  const xd=document.getElementById('g-xlabel-display');
+  const yd=document.getElementById('g-ylabel-display');
+  if(td) td.textContent=title;
+  if(xd) xd.textContent=xl;
+  if(yd) yd.textContent=yl;
+  saveAll();
+}
+
+// ── LOCAL STORAGE AUTO-SAVE ───────────────────────────────────────────────
+const LS='psych_l7_';
+let saveDebounce;
+
+function saveAll(){
+  // Writing fields
+  document.querySelectorAll('.writing-field').forEach((f,i)=>localStorage.setItem(LS+'wf-'+i,f.value));
+  // Data input
+  for(let i=0;i<10;i++){
+    const c=document.getElementById('di-cond-'+i);
+    const s=document.getElementById('di-score-'+i);
+    if(c) localStorage.setItem(LS+'di-cond-'+i,c.value);
+    if(s) localStorage.setItem(LS+'di-score-'+i,s.value);
+  }
+  // Graph meta
+  ['g-title','g-xlabel','g-ylabel'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) localStorage.setItem(LS+id,el.value);
+  });
+  // Peer review selects
+  ['pr1','pr2','pr3','pr4','pr5','pr6','pr7'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) localStorage.setItem(LS+id,el.value);
+  });
+  ['reviewer-name','peer-strength','peer-improve','exit-response','hook-q1','hook-q2','hook-q3','trend-q1','trend-q2','trend-q3'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) localStorage.setItem(LS+id,el.value);
+  });
+  showSaveStatus();
+}
+
+function restoreAll(){
+  // Writing fields
+  document.querySelectorAll('.writing-field').forEach((f,i)=>{
+    const saved=localStorage.getItem(LS+'wf-'+i);
+    if(saved) f.value=saved;
+  });
+  // Data input
+  for(let i=0;i<10;i++){
+    const c=document.getElementById('di-cond-'+i);
+    const s=document.getElementById('di-score-'+i);
+    if(c) c.value=localStorage.getItem(LS+'di-cond-'+i)||'';
+    if(s) s.value=localStorage.getItem(LS+'di-score-'+i)||'';
+  }
+  // Graph meta
+  ['g-title','g-xlabel','g-ylabel'].forEach(id=>{
+    const saved=localStorage.getItem(LS+id);
+    const el=document.getElementById(id);
+    if(saved&&el) el.value=saved;
+  });
+  // Peer dropdowns
+  ['pr1','pr2','pr3','pr4','pr5','pr6','pr7'].forEach(id=>{
+    const saved=localStorage.getItem(LS+id);
+    const el=document.getElementById(id);
+    if(saved&&el) el.value=saved;
+  });
+  ['reviewer-name','peer-strength','peer-improve','exit-response','hook-q1','hook-q2','hook-q3','trend-q1','trend-q2','trend-q3'].forEach(id=>{
+    const saved=localStorage.getItem(LS+id);
+    const el=document.getElementById(id);
+    if(saved&&el) el.value=saved;
+  });
+  updateGraphMeta();
+  updateGraph();
+}
+
+function showSaveStatus(){
+  const el=document.getElementById('save-status');
+  if(!el)return;
+  el.textContent='✓ Saved to this device';
+  el.style.opacity='1';
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>{el.style.opacity='0';},2500);
+}
+
+function clearSaved(){
+  if(!confirm('Clear all saved responses for this lesson?')) return;
+  Object.keys(localStorage).filter(k=>k.startsWith(LS)).forEach(k=>localStorage.removeItem(k));
+  document.querySelectorAll('.writing-field').forEach(f=>f.value='');
+  ['reviewer-name','exit-response'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  showSaveStatus();
+}
+
+document.addEventListener('input',()=>{clearTimeout(saveDebounce);saveDebounce=setTimeout(saveAll,600);});
+document.addEventListener('change',()=>{clearTimeout(saveDebounce);saveDebounce=setTimeout(saveAll,600);});
+
+// ── Init ──────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  startLessonClock();
+  buildDataInput();
+  restoreAll();
+
+  // Save status bar in header
+  const hi=document.querySelector('.header-inner');
+  if(hi){
+    const bar=document.createElement('div');
+    bar.style.cssText='margin-top:8px;display:flex;align-items:center;gap:12px;';
+    bar.innerHTML=`<span id="save-status" style="font-size:12px;color:var(--gold);opacity:0;transition:opacity .4s;font-weight:600"></span><button onclick="clearSaved()" style="background:none;border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:3px 10px;font-size:12px;color:rgba(255,255,255,.5);cursor:pointer;margin-left:auto">Clear saved data</button>`;
+    hi.appendChild(bar);
+  }
+
+  // Restore notice
+  const hasData=Object.keys(localStorage).some(k=>k.startsWith(LS));
+  if(hasData){
+    const notice=document.createElement('div');
+    notice.style.cssText='background:#FDF6E3;border-bottom:1px solid var(--gold);padding:.6rem 2rem;font-size:13px;color:#5C4A1E;display:flex;align-items:center;gap:10px;';
+    notice.innerHTML=`<span>📂 <strong>Your previous responses have been restored</strong> — this device remembered where you left off.</span><button onclick="this.parentElement.remove()" style="margin-left:auto;background:none;border:none;cursor:pointer;font-size:16px;color:var(--gold)">✕</button>`;
+    document.querySelector('.nav-bar').insertAdjacentElement('afterend',notice);
+  }
+});
+</script>
+</body>
+</html>
