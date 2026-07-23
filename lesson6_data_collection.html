@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 6 — Data Collection Techniques</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy: #1B2A4A; --gold: #C9A84C; --bg: #F7F5F0; --surface: #fff;
+  --border: #E2DDD6; --text: #1A1A1A; --muted: #6B6560; --radius: 10px;
+  --green: #2E7D32; --green-bg: #E8F5EE;
+  --red: #C62828;   --red-bg: #FFEBEE;
+  --purple: #5B4FCC; --purple-bg: #EEEDFE;
+  --amber: #BF5000;  --amber-bg: #FEF3E7;
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+
+/* ── Header ── */
+header { background: var(--navy); color: white; padding: 1.25rem 2rem; border-bottom: 3px solid var(--gold); }
+.header-inner { max-width: 980px; margin: 0 auto; }
+.badge { background: var(--gold); color: var(--navy); font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px; display: inline-block; margin-bottom: 6px; }
+header h1 { font-size: 20px; font-weight: 600; }
+header p  { font-size: 13px; opacity: .65; margin-top: 2px; }
+
+/* ── Phase bar ── */
+.phase-bar { background: var(--navy); border-bottom: 1px solid rgba(255,255,255,.1); padding: .6rem 2rem; }
+.phase-inner { max-width: 980px; margin: 0 auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.phase-label { color: rgba(255,255,255,.6); font-size: 13px; white-space: nowrap; }
+.phase-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.phase-pill { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600; cursor: pointer; border: 1px solid rgba(255,255,255,.2); color: white; background: rgba(255,255,255,.1); transition: all .15s; }
+.phase-pill:hover { opacity: .8; }
+.phase-pill.active { background: var(--gold); color: var(--navy); border-color: var(--gold); }
+.lesson-clock { margin-left: auto; font-size: 13px; color: var(--gold); font-weight: 600; }
+
+/* ── Nav ── */
+.nav-bar { background: white; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
+.nav-inner { max-width: 980px; margin: 0 auto; display: flex; overflow-x: auto; padding: 0 1rem; }
+.nav-tab { background: none; border: none; border-bottom: 3px solid transparent; padding: 11px 16px; font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; white-space: nowrap; margin-bottom: -1px; transition: color .15s, border-color .15s; }
+.nav-tab.active { color: var(--navy); border-bottom-color: var(--gold); }
+.nav-tab:hover:not(.active) { color: var(--text); }
+
+main { max-width: 980px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+.section { display: none; }
+.section.active { display: block; }
+
+/* ── Generic ── */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.25rem; }
+.card-title { font-size: 16px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
+.card-sub   { font-size: 13px; color: var(--muted); margin-bottom: 1rem; }
+.time-badge { display: inline-flex; align-items: center; gap: 5px; background: var(--gold); color: var(--navy); font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-bottom: 12px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media(max-width:600px){ .two-col { grid-template-columns: 1fr; } }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+@media(max-width:650px){ .three-col { grid-template-columns: 1fr; } }
+
+/* ── Hook ── */
+.hook { background: linear-gradient(135deg, var(--navy), #2E4070); border-radius: var(--radius); padding: 1.75rem 2rem; margin-bottom: 1.25rem; color: white; }
+.hook-eye { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; opacity: .6; margin-bottom: 8px; }
+.hook h2  { font-size: 20px; font-weight: 600; line-height: 1.45; margin-bottom: 1rem; }
+.hook-note{ background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); border-radius: 8px; padding: 10px 14px; font-size: 14px; }
+
+/* ── Goals / SC ── */
+.goals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media(max-width:560px){ .goals-grid { grid-template-columns: 1fr; } }
+.goal-item { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 11px 14px; font-size: 14px; display: flex; gap: 10px; }
+.gnum { background: var(--navy); color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; margin-top: 1px; }
+.sc-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; font-size: 14px; margin-bottom: 8px; }
+.sc-check { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 4px; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; margin-top: 1px; }
+.sc-check.checked { background: var(--navy); border-color: var(--navy); }
+.sc-check.checked::after { content: '✓'; color: white; font-size: 11px; }
+
+/* ── Steps ── */
+.steps-list { display: flex; flex-direction: column; gap: 10px; }
+.step-item { display: flex; gap: 12px; padding: 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 9px; }
+.step-num { background: var(--gold); color: var(--navy); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+.step-text h4 { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+.step-text p  { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+/* ── Error table ── */
+.error-table-wrap { overflow-x: auto; margin-bottom: 1rem; }
+.error-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.error-table th { background: var(--navy); color: white; padding: 9px 12px; text-align: left; font-weight: 600; font-size: 13px; }
+.error-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.error-table tr:nth-child(even) td { background: var(--bg); }
+.error-flag { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-left: 6px; }
+.flag-red    { background: var(--red-bg);   color: var(--red);   }
+.flag-amber  { background: var(--amber-bg); color: var(--amber); }
+
+/* ── Error spotter game ── */
+.error-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1.25rem; }
+.error-card-header { background: var(--navy); color: white; padding: .9rem 1.25rem; }
+.error-card-header h3 { font-size: 15px; font-weight: 600; }
+.error-card-header p  { font-size: 12px; opacity: .65; margin-top: 2px; }
+.error-body { padding: 1.25rem; }
+.error-row-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: all .15s; }
+.error-row-item:hover { border-color: var(--gold); background: #FDF6E3; }
+.error-row-item.selected { border-color: var(--red); background: var(--red-bg); }
+.error-row-item.correct  { border-color: var(--green); background: var(--green-bg); }
+.error-row-item.miss     { border-color: var(--amber); background: var(--amber-bg); }
+.err-num { font-weight: 700; color: var(--muted); flex-shrink: 0; width: 20px; }
+.err-text { font-size: 14px; flex: 1; line-height: 1.5; }
+.err-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; margin-top: 3px; }
+.err-feedback { margin-top: 10px; padding: 10px 14px; border-radius: 8px; font-size: 14px; line-height: 1.55; display: none; }
+.err-feedback.show { display: block; }
+.err-feedback.pass { background: var(--green-bg); border: 1px solid var(--green); color: #1A4D1D; }
+.err-feedback.partial { background: var(--amber-bg); border: 1px solid var(--amber); color: #7A3300; }
+.err-feedback.fail { background: var(--red-bg); border: 1px solid var(--red); color: #7A1515; }
+.check-errors-btn { background: var(--navy); color: white; border: none; border-radius: 8px; padding: 9px 22px; font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 8px; }
+.check-errors-btn:hover { opacity: .85; }
+.reset-btn { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 9px 16px; font-size: 13px; color: var(--muted); cursor: pointer; margin-left: 8px; }
+
+/* ── Pavlov story ── */
+.story-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1.25rem; }
+.story-header { background: linear-gradient(135deg, #2E4070, var(--navy)); color: white; padding: 1rem 1.25rem; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+.story-header h3 { font-size: 15px; font-weight: 600; flex: 1; }
+.story-arrow { transition: transform .2s; color: rgba(255,255,255,.6); }
+.story-arrow.open { transform: rotate(180deg); }
+.story-body { padding: 1.25rem; display: none; }
+.story-body.open { display: block; }
+.story-beat { display: flex; gap: 12px; margin-bottom: 14px; font-size: 14px; line-height: 1.6; }
+.story-icon { font-size: 22px; flex-shrink: 0; width: 28px; text-align: center; margin-top: 2px; }
+.story-text p { color: var(--text); }
+.story-text strong { color: var(--navy); }
+.lesson-link { background: var(--amber-bg); border: 1px solid var(--amber); border-radius: 8px; padding: 12px 14px; font-size: 14px; color: #5C3200; line-height: 1.6; margin-top: 12px; }
+.lesson-link strong { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .4px; color: var(--amber); margin-bottom: 4px; }
+
+/* ── Best practices ── */
+.practice-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 1.25rem; }
+@media(max-width:650px){ .practice-grid { grid-template-columns: 1fr; } }
+.practice-card { border-radius: 10px; padding: 1.1rem; border: 1px solid; border-top-width: 4px; }
+.practice-card.p1 { background: var(--green-bg);  border-color: var(--green);  }
+.practice-card.p2 { background: var(--purple-bg); border-color: var(--purple); }
+.practice-card.p3 { background: var(--amber-bg);  border-color: var(--amber);  }
+.pc-icon  { font-size: 26px; margin-bottom: 8px; }
+.pc-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+.practice-card.p1 .pc-label { color: var(--green);  }
+.practice-card.p2 .pc-label { color: var(--purple); }
+.practice-card.p3 .pc-label { color: var(--amber);  }
+.pc-name { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+.pc-def  { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 8px; }
+.pc-do   { font-size: 13px; padding: 7px 10px; border-radius: 6px; line-height: 1.5; }
+.practice-card.p1 .pc-do { background: rgba(46,125,50,.1); color: #1A4D1D; }
+.practice-card.p2 .pc-do { background: rgba(91,79,204,.1); color: #2A206A; }
+.practice-card.p3 .pc-do { background: rgba(191,80,0,.1);  color: #7A3300; }
+.pc-do strong { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 3px; opacity: .7; }
+
+/* ── Data recording sheet ── */
+.data-sheet { background: var(--surface); border: 2px solid var(--navy); border-radius: var(--radius); overflow: hidden; margin-bottom: 1.25rem; }
+.ds-header { background: var(--navy); color: white; padding: 1rem 1.25rem; }
+.ds-header h3 { font-size: 15px; font-weight: 600; }
+.ds-header p  { font-size: 12px; opacity: .65; margin-top: 2px; }
+.ds-body { padding: 1.25rem; }
+.ds-meta { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 1.25rem; }
+@media(max-width:540px){ .ds-meta { grid-template-columns: 1fr; } }
+.ds-field { display: flex; flex-direction: column; gap: 4px; }
+.ds-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); }
+.ds-input { border: 1.5px solid var(--border); border-radius: 7px; padding: 7px 10px; font-size: 14px; font-family: inherit; color: var(--text); background: var(--bg); transition: border-color .15s; }
+.ds-input:focus { outline: none; border-color: var(--gold); background: white; }
+.ds-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 1.25rem; }
+.ds-table th { background: var(--navy); color: white; padding: 8px 10px; text-align: left; font-weight: 600; font-size: 12px; }
+.ds-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.ds-table td input { width: 100%; border: 1px solid var(--border); border-radius: 5px; padding: 5px 8px; font-size: 13px; font-family: inherit; background: var(--bg); color: var(--text); }
+.ds-table td input:focus { outline: none; border-color: var(--gold); background: white; }
+.ds-table tr:nth-child(even) td { background: #FAFAF8; }
+.ds-averages { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.25rem; }
+.ds-avg-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+.ds-avg-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 8px; }
+.ds-avg-val { font-size: 28px; font-weight: 700; color: var(--navy); }
+.ds-avg-sub  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.calc-btn { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 5px 12px; font-size: 12px; color: var(--muted); cursor: pointer; margin-top: 8px; transition: all .1s; }
+.calc-btn:hover { background: var(--bg); color: var(--text); }
+.ds-reflect h4 { font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 10px; }
+.ds-reflect-item { margin-bottom: 12px; }
+.ds-reflect-item label { font-size: 13px; font-weight: 500; color: var(--text); display: block; margin-bottom: 5px; }
+.ds-reflect-item textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 7px; padding: 8px 10px; font-size: 13px; font-family: inherit; resize: none; background: var(--bg); color: var(--text); min-height: 52px; transition: border-color .15s; }
+.ds-reflect-item textarea:focus { outline: none; border-color: var(--gold); background: white; }
+
+/* ── Countdown ── */
+.countdown-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.25rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.cd-display { font-size: 38px; font-weight: 700; color: var(--navy); font-variant-numeric: tabular-nums; min-width: 90px; }
+.cd-display.urgent { color: var(--red); }
+.cd-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.timer-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.t-btn { background: var(--navy); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity .15s; }
+.t-btn:hover { opacity: .85; }
+.t-btn.ghost { background: none; color: var(--navy); border: 1px solid var(--border); }
+.t-btn.ghost:hover { background: var(--bg); }
+.presets { display: flex; gap: 6px; flex-wrap: wrap; }
+.preset { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 5px 12px; font-size: 12px; color: var(--muted); cursor: pointer; transition: all .1s; }
+.preset:hover { background: var(--bg); color: var(--text); }
+
+/* ── Common errors game ── */
+.error-match { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+@media(max-width:600px){ .error-match { grid-template-columns: 1fr; } }
+.em-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 9px; padding: 1rem; cursor: pointer; transition: all .15s; }
+.em-card:hover { border-color: var(--gold); background: #FDF6E3; }
+.em-card.selected { border-color: var(--navy); background: #E8EEF7; }
+.em-card.correct  { border-color: var(--green); background: var(--green-bg); }
+.em-card.wrong    { border-color: var(--red);   background: var(--red-bg);   }
+.em-title { font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
+.em-desc  { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+/* ── Writing task ── */
+.writing-prompt { background: linear-gradient(135deg, var(--navy), #2E4070); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1rem; color: white; }
+.wp-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; opacity: .6; margin-bottom: 8px; }
+.wp-q { font-size: 17px; font-weight: 600; line-height: 1.45; }
+.writing-field { width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 14px; font-family: inherit; color: var(--text); background: var(--surface); resize: vertical; min-height: 90px; transition: border-color .15s; }
+.writing-field:focus { outline: none; border-color: var(--gold); }
+.starter-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: .75rem; }
+.starter { font-size: 13px; padding: 5px 12px; border-radius: 20px; background: var(--amber-bg); border: 1px solid var(--amber); color: var(--amber); cursor: pointer; transition: opacity .15s; }
+.starter:hover { opacity: .75; }
+
+/* ── TPS ── */
+.tps-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 1.25rem; }
+@media(max-width:560px){ .tps-grid { grid-template-columns: 1fr; } }
+.tps-card { border-radius: 10px; padding: 1.1rem; }
+.tps-card.think  { background: #E8EEF7; border: 1px solid var(--navy);   }
+.tps-card.pair   { background: var(--green-bg); border: 1px solid var(--green); }
+.tps-card.share  { background: var(--amber-bg); border: 1px solid var(--amber); }
+.tps-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px; }
+.tps-card.think  .tps-label { color: var(--navy);  }
+.tps-card.pair   .tps-label { color: var(--green); }
+.tps-card.share  .tps-label { color: var(--amber); }
+.tps-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.tps-card p  { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+/* ── Tip box ── */
+.tip-box { border-radius: 8px; padding: 12px 14px; font-size: 14px; line-height: 1.55; margin-bottom: 12px; }
+.tip-box.green  { background: var(--green-bg);  border-left: 3px solid var(--green);  color: #1A4D1D; }
+.tip-box.amber  { background: var(--amber-bg);  border-left: 3px solid var(--amber);  color: #5C3200; }
+.tip-box.red    { background: var(--red-bg);    border-left: 3px solid var(--red);    color: #7A1515; }
+.tip-box strong { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 4px; opacity: .8; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.section.active > * { animation: fadeUp .22s ease both; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="badge">Year 9 Psychology · Lesson 6 · 70 minutes</div>
+    <h1>Data Collection Techniques</h1>
+    <p>How to collect reliable, accurate, and replicable data in psychological experiments</p>
+  </div>
+</header>
+
+<div class="phase-bar">
+  <div class="phase-inner">
+    <span class="phase-label">Phase:</span>
+    <div class="phase-pills">
+      <div class="phase-pill active" onclick="setPhase(0)">🐶 Hook (0–10 min)</div>
+      <div class="phase-pill" onclick="setPhase(1)">📋 Teach (10–25 min)</div>
+      <div class="phase-pill" onclick="setPhase(2)">🔬 Experiment (25–50 min)</div>
+      <div class="phase-pill" onclick="setPhase(3)">✍️ Reflect (50–60 min)</div>
+      <div class="phase-pill" onclick="setPhase(4)">💭 Exit (60–70 min)</div>
+    </div>
+    <span class="lesson-clock" id="lesson-clock">⏱ 70:00</span>
+  </div>
+</div>
+
+<nav class="nav-bar">
+  <div class="nav-inner">
+    <button class="nav-tab active" onclick="show('overview')">Overview</button>
+    <button class="nav-tab" onclick="show('hook')">Hook</button>
+    <button class="nav-tab" onclick="show('teach')">Teach</button>
+    <button class="nav-tab" onclick="show('experiment')">Experiment</button>
+    <button class="nav-tab" onclick="show('reflect')">Reflect</button>
+    <button class="nav-tab" onclick="show('exit')">Exit Ticket</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- ══ OVERVIEW ══════════════════════════════════════════════════════════════ -->
+<div class="section active" id="s-overview">
+
+  <div class="card">
+    <div class="card-title">📋 Lesson at a Glance — 70 minutes</div>
+    <div class="card-sub">Five phases — use the phase indicator above to track timing.</div>
+    <div class="steps-list">
+      <div class="step-item"><div class="step-num">1</div><div class="step-text"><h4>🐶 Hook — 10 min</h4><p>Spot the Error: find the mistakes in a messy data table. Then hear the story of Pavlov's accidental discovery and what it teaches us about data collection.</p></div></div>
+      <div class="step-item"><div class="step-num">2</div><div class="step-text"><h4>📋 Teach — 15 min</h4><p>Three best practices: consistent procedures, accurate recording, avoiding bias. Interactive accordion with examples for each.</p></div></div>
+      <div class="step-item"><div class="step-num">3</div><div class="step-text"><h4>🔬 Mock Experiment — 25 min</h4><p>Pairs run a live memory recall experiment. One researcher, one participant — then swap. Record data on the digital data sheet. Calculate group averages.</p></div></div>
+      <div class="step-item"><div class="step-num">4</div><div class="step-text"><h4>✍️ Individual Reflection — 10 min</h4><p>Students assess the reliability of the data they collected and write one specific improvement they would make.</p></div></div>
+      <div class="step-item"><div class="step-num">5</div><div class="step-text"><h4>💭 Think-Pair-Share Exit — 10 min</h4><p>Class reflection: "How can unreliable data affect the conclusions of an experiment?"</p></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📚 Learning Goals</div>
+    <div class="card-sub">By the end of this lesson you will be able to:</div>
+    <div class="goals-grid">
+      <div class="goal-item"><div class="gnum">1</div>Use appropriate techniques to record accurate data in a psychological experiment.</div>
+      <div class="goal-item"><div class="gnum">2</div>Identify potential errors and inconsistencies during data collection.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">✅ Success Criteria</div>
+    <div class="card-sub">Tick each one as you feel confident:</div>
+    <div class="sc-item"><div class="sc-check" onclick="tick(this)"></div>I can explain how to ensure reliability in data collection.</div>
+    <div class="sc-item"><div class="sc-check" onclick="tick(this)"></div>I can identify errors in a data table and explain why they are a problem.</div>
+    <div class="sc-item" style="margin-bottom:0"><div class="sc-check" onclick="tick(this)"></div>I can record data accurately during a mock memory recall experiment.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📖 Resources</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px">
+      <div style="flex:1;min-width:180px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:14px"><strong>📕 Textbook</strong><br><span style="color:var(--muted);font-size:13px">Cambridge Get Psyched! — Data Collection Section</span></div>
+      <div style="flex:1;min-width:180px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:14px"><strong>📄 Data Sheet</strong><br><span style="color:var(--muted);font-size:13px">Built into this lesson — use the Experiment tab</span></div>
+      <div style="flex:1;min-width:180px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:14px"><strong>⏱ Stopwatch</strong><br><span style="color:var(--muted);font-size:13px">Built into the Experiment tab — 30-second timer</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HOOK ═══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s-hook">
+
+  <div class="time-badge">⏱ 10 minutes</div>
+
+  <div class="hook">
+    <div class="hook-eye">🎯 Lesson Hook</div>
+    <h2>Spot the Error — what's wrong with this data?</h2>
+    <div class="hook-note">🔍 <em>Look at the table below. Before you click anything — how many problems can you find? Count them up in your head first.</em></div>
+  </div>
+
+  <!-- Error spotter game -->
+  <div class="error-card">
+    <div class="error-card-header">
+      <h3>Memory Recall Experiment — Mock Data Table</h3>
+      <p>Click on every row that contains a data collection error, then check your answers.</p>
+    </div>
+    <div class="error-body">
+      <div class="error-table-wrap" style="margin-bottom:1.25rem">
+        <table class="error-table">
+          <thead><tr><th>Participant</th><th>Group</th><th>Words Recalled</th><th>Observation Notes</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Silence</td><td>8</td><td>Good performance</td></tr>
+            <tr><td>2</td><td>Music</td><td><span style="color:var(--red);font-weight:700">—</span></td><td>Missing data</td></tr>
+            <tr><td>3</td><td>Silence</td><td>15</td><td>Excellent memory!</td></tr>
+            <tr><td>4</td><td>Music</td><td>10</td><td><span style="color:var(--amber);font-weight:700">Words recalled: 12</span></td></tr>
+            <tr><td>5</td><td>Silence</td><td>12</td><td><span style="color:var(--amber);font-weight:700">Inconsistent handwriting</span></td></tr>
+            <tr><td>6</td><td>Music</td><td>11</td><td><span style="color:var(--red);font-weight:700">Music too loud; distracted</span></td></tr>
+            <tr><td>7</td><td>Silence</td><td>7</td><td><span style="color:var(--red);font-weight:700">Group not timed accurately</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:10px">Click every participant row that has a data collection problem:</div>
+
+      <div id="error-rows"></div>
+      <div class="err-feedback" id="err-feedback"></div>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button class="check-errors-btn" onclick="checkErrors()">Check my answers</button>
+        <button class="reset-btn" onclick="resetErrors()">↺ Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pavlov story -->
+  <div class="story-card">
+    <div class="story-header" onclick="toggleStory(this)">
+      <div style="font-size:24px">🐶</div>
+      <h3>The Story of Pavlov's Data Collection Disaster</h3>
+      <div class="story-arrow">▼</div>
+    </div>
+    <div class="story-body">
+      <div class="story-beat"><div class="story-icon">🔬</div><div class="story-text"><p><strong>The experiment:</strong> Ivan Pavlov was studying digestion in dogs — not learning. His team measured how much saliva dogs produced when given food, using tubes placed in the dogs' mouths.</p></div></div>
+      <div class="story-beat"><div class="story-icon">📊</div><div class="story-text"><p><strong>The "error":</strong> Something strange kept appearing in the data. The dogs were producing saliva before they even received food — when they heard footsteps or saw the lab assistant who usually fed them.</p></div></div>
+      <div class="story-beat"><div class="story-icon">⚠️</div><div class="story-text"><p><strong>The team's reaction:</strong> Pavlov's assistants assumed the measurements were off — a data collection error. They nearly dismissed the inconsistency and moved on.</p></div></div>
+      <div class="story-beat"><div class="story-icon">🔎</div><div class="story-text"><p><strong>What Pavlov did instead:</strong> He standardised the environment (soundproofed the lab), controlled the timing of the bell and food precisely, and trained assistants to record saliva consistently. The "error" turned out to be real and repeatable.</p></div></div>
+      <div class="story-beat"><div class="story-icon">🧠</div><div class="story-text"><p><strong>The breakthrough:</strong> The dogs had learned to associate the sound of the feeder with food — this wasn't a mistake, it was <em>classical conditioning</em>. One of the most important discoveries in the history of psychology nearly disappeared because of poor data collection practices.</p></div></div>
+      <div class="lesson-link">
+        <strong>Lesson connection — discuss with your partner:</strong>
+        "What would have happened if Pavlov had simply thrown out the inconsistent data?" · "How can we apply this lesson to our own experiment today?"
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ TEACH ══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s-teach">
+
+  <div class="time-badge">⏱ 15 minutes</div>
+
+  <div class="card">
+    <div class="card-title">📋 Three Best Practices for Data Collection</div>
+    <div class="card-sub">Every reliable psychology experiment follows these principles. Miss one and your results become meaningless.</div>
+  </div>
+
+  <div class="practice-grid">
+    <div class="practice-card p1">
+      <div class="pc-icon">📏</div>
+      <div class="pc-label">Principle 1</div>
+      <div class="pc-name">Consistent Procedures</div>
+      <div class="pc-def">Every participant must experience the experiment in exactly the same way — same instructions, same timing, same environment. If one group gets more time or a different word list, the results are meaningless.</div>
+      <div class="pc-do"><strong>In our experiment:</strong>Read words at the same pace for everyone. Start and stop timing at the same point. Use the same word list every time.</div>
+    </div>
+    <div class="practice-card p2">
+      <div class="pc-icon">📝</div>
+      <div class="pc-label">Principle 2</div>
+      <div class="pc-name">Accurate Recording</div>
+      <div class="pc-def">Data must be recorded clearly, immediately, and completely. Avoid shorthand, vague comments, or leaving fields blank. One missing entry can throw off an entire dataset.</div>
+      <div class="pc-do"><strong>In our experiment:</strong>Write the exact number of words recalled. Don't add subjective notes ("great memory!"). Double-check every entry before moving on.</div>
+    </div>
+    <div class="practice-card p3">
+      <div class="pc-icon">🙈</div>
+      <div class="pc-label">Principle 3</div>
+      <div class="pc-name">Avoiding Bias</div>
+      <div class="pc-def">Researchers must not accidentally (or deliberately) influence participants. This includes body language, tone of voice, hints, or treating different groups differently.</div>
+      <div class="pc-do"><strong>In our experiment:</strong>Read the word list in a neutral tone for all participants. Don't react differently to how many words someone recalls. Don't tell participants how others performed.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚠️ Common Data Collection Errors — Can you recognise them?</div>
+    <div class="card-sub">Match each error type to its description. Click the one that best applies, then check.</div>
+    <div id="match-game"></div>
+  </div>
+
+  <div class="card" style="margin-top:.5rem">
+    <div class="card-title">🔴 What makes data unreliable?</div>
+    <div class="card-sub">Three questions to ask about any dataset:</div>
+    <div class="tip-box green"><strong>Ask: Is it consistent?</strong>Would the same participant get the same result if tested again under the same conditions? If not, the procedure may be inconsistent.</div>
+    <div class="tip-box amber"><strong>Ask: Is it complete?</strong>Are there missing values, blank fields, or observations that weren't recorded? Missing data cannot be averaged and may indicate a flaw in procedure.</div>
+    <div class="tip-box red"><strong>Ask: Is it unbiased?</strong>Did anything about how the researcher behaved, or how conditions varied between groups, give one group an advantage? If so, the DV is not measuring only the IV's effect.</div>
+  </div>
+
+</div>
+
+<!-- ══ EXPERIMENT ════════════════════════════════════════════════════════════ -->
+<div class="section" id="s-experiment">
+
+  <div class="time-badge">⏱ 25 minutes — pair activity</div>
+
+  <div class="countdown-wrap">
+    <div>
+      <div class="cd-display" id="exp-timer">05:00</div>
+      <div class="cd-label">Activity timer</div>
+    </div>
+    <div>
+      <div class="timer-btns" style="margin-bottom:8px">
+        <button class="t-btn" onclick="startExp()">▶ Start</button>
+        <button class="t-btn ghost" onclick="pauseExp()">⏸ Pause</button>
+        <button class="t-btn ghost" onclick="resetExp()">↺ Reset</button>
+      </div>
+      <div class="presets">
+        <button class="preset" onclick="setExp(1)">1 min</button>
+        <button class="preset" onclick="setExp(2)">2 min</button>
+        <button class="preset" onclick="setExp(5)">5 min</button>
+        <button class="preset" onclick="setExp(10)">10 min</button>
+        <button class="preset" onclick="setExp(30,true)">30 sec</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔬 Mock Memory Recall Experiment</div>
+    <div class="card-sub">You will run this experiment twice — once as researcher, once as participant.</div>
+    <div class="steps-list" style="margin-bottom:1rem">
+      <div class="step-item"><div class="step-num">1</div><div class="step-text"><h4>Assign roles</h4><p>One person is the <strong>Researcher</strong> (reads the word list, times the recall, records data). The other is the <strong>Participant</strong> (listens to the words, then recalls as many as possible).</p></div></div>
+      <div class="step-item"><div class="step-num">2</div><div class="step-text"><h4>Run the experiment</h4><p>Researcher reads the 10 words below clearly and at a steady pace. Then start the 30-second timer. Participant writes or says as many words as they can remember.</p></div></div>
+      <div class="step-item"><div class="step-num">3</div><div class="step-text"><h4>Record the result</h4><p>Count the correct words and enter them in the data sheet below. Add any observation notes — but keep them factual (no "great memory!").</p></div></div>
+      <div class="step-item"><div class="step-num">4</div><div class="step-text"><h4>Swap roles</h4><p>Switch researcher and participant, and repeat with the same word list so results are comparable.</p></div></div>
+    </div>
+
+    <div style="background:var(--navy);color:white;border-radius:10px;padding:1.1rem 1.25rem;margin-bottom:1rem">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;opacity:.6;margin-bottom:10px">📋 Word List — read these aloud, one per second:</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">
+        <div style="background:rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;font-size:15px;font-weight:600;text-align:center">APPLE</div>
+        <div style="background:rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;font-size:15px;font-weight:600;text-align:center">RIVER</div>
+        <div style="background:rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;font-size:15px;font-weight:600;text-align:center">CLOCK</div>
+        <div style="background:rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;font-size:15px;font-weight:600;text-align:center">BOTTLE</div>
+        <div style="background:rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;font-size:15px;font-weight:600;text-align:center">SUNSET</div>
+        <div style="background:rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;font-size:15px;font-weight:600;text-align:center">GUITAR</div>
+        <div style="background:rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;font-size:15px;font-weight:600;text-align:center">PENCIL</div>
+        <div style="background:rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;font-size:15px;font-weight:600;text-align:center">WINDOW</div>
+        <div style="background:rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;font-size:15px;font-weight:600;text-align:center">TIGER</div>
+        <div style="background:rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;font-size:15px;font-weight:600;text-align:center">CANDLE</div>
+      </div>
+      <div style="margin-top:14px;font-size:13px;opacity:.7">⏱ After reading: start the 30-second recall timer above. Say "Go!" and start immediately.</div>
+    </div>
+  </div>
+
+  <!-- Data sheet -->
+  <div class="data-sheet">
+    <div class="ds-header">
+      <h3>📊 Data Recording Sheet</h3>
+      <p>The Effect of [Condition] on Memory Recall — fill in all fields</p>
+    </div>
+    <div class="ds-body">
+      <div class="ds-meta">
+        <div class="ds-field"><label class="ds-label">Experiment Title</label><input class="ds-input" placeholder="e.g. Effect of music on memory recall"></div>
+        <div class="ds-field"><label class="ds-label">Date</label><input class="ds-input" type="date"></div>
+        <div class="ds-field"><label class="ds-label">Researcher Name</label><input class="ds-input" placeholder="Your name"></div>
+      </div>
+
+      <table class="ds-table" id="data-table">
+        <thead><tr><th>#</th><th>Condition (Silence / Music)</th><th>Words Recalled (0–10)</th><th>Observation Notes</th></tr></thead>
+        <tbody id="data-rows"></tbody>
+      </table>
+
+      <div class="ds-averages">
+        <div class="ds-avg-box">
+          <div class="ds-avg-label">Silence Group Average</div>
+          <div class="ds-avg-val" id="avg-silence">—</div>
+          <div class="ds-avg-sub" id="avg-silence-sub">Enter data above first</div>
+          <button class="calc-btn" onclick="calcAvgs()">Calculate averages</button>
+        </div>
+        <div class="ds-avg-box">
+          <div class="ds-avg-label">Music Group Average</div>
+          <div class="ds-avg-val" id="avg-music">—</div>
+          <div class="ds-avg-sub" id="avg-music-sub">Enter data above first</div>
+        </div>
+      </div>
+
+      <div class="ds-reflect">
+        <h4>📝 Reflection Questions</h4>
+        <div class="ds-reflect-item">
+          <label>1. Did you notice any patterns or trends in the data?</label>
+          <textarea placeholder="e.g. The silence group seemed to recall more words on average…"></textarea>
+        </div>
+        <div class="ds-reflect-item">
+          <label>2. Were there any inconsistencies or challenges during data collection?</label>
+          <textarea placeholder="e.g. It was hard to keep reading at the same pace each time…"></textarea>
+        </div>
+        <div class="ds-reflect-item">
+          <label>3. What steps could improve the accuracy of this data?</label>
+          <textarea placeholder="e.g. We could use a recording of the words so the pace is identical every time…"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ REFLECT ════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s-reflect">
+
+  <div class="time-badge">⏱ 10 minutes — individual task</div>
+
+  <div class="writing-prompt">
+    <div class="wp-label">✍️ Individual Reflection</div>
+    <div class="wp-q">"How reliable was the data you recorded? What is one specific improvement you would make if you ran this experiment again?"</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Write your response</div>
+    <div class="card-sub">Aim for 3–5 sentences. Refer specifically to something that happened in your experiment — not just general principles. Use a sentence starter below if you need one.</div>
+    <textarea class="writing-field" placeholder="Write your response here…"></textarea>
+    <div class="starter-row">
+      <div class="starter" onclick="addStarter(this)">"The data I collected was [reliable/unreliable] because…"</div>
+      <div class="starter" onclick="addStarter(this)">"One inconsistency I noticed was…"</div>
+      <div class="starter" onclick="addStarter(this)">"If I ran this experiment again, I would improve… because…"</div>
+      <div class="starter" onclick="addStarter(this)">"The biggest challenge during data collection was…"</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔄 Pair comparison</div>
+    <div class="card-sub">Compare your recorded data with your partner's for the same trials — then discuss:</div>
+    <div class="steps-list">
+      <div class="step-item"><div class="step-num">?</div><div class="step-text"><h4>Do your numbers match?</h4><p>If you each recorded different word counts for the same participant, why might that be? What does this reveal about reliability?</p></div></div>
+      <div class="step-item"><div class="step-num">?</div><div class="step-text"><h4>Are your notes consistent?</h4><p>Did you both write similar observation notes, or did you notice different things? What might have caused this?</p></div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ EXIT ═══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s-exit">
+
+  <div class="time-badge">⏱ 10 minutes</div>
+
+  <div class="writing-prompt">
+    <div class="wp-label">💭 Exit Ticket — Think-Pair-Share</div>
+    <div class="wp-q">"How can inconsistent or unreliable data affect the conclusions of an experiment?"</div>
+  </div>
+
+  <div class="tps-grid">
+    <div class="tps-card think">
+      <div class="tps-label">Step 1 — Think (2 min)</div>
+      <h4>Write individually</h4>
+      <p>Answer the question in the box below before talking to anyone.</p>
+    </div>
+    <div class="tps-card pair">
+      <div class="tps-label">Step 2 — Pair (3 min)</div>
+      <h4>Discuss with a partner</h4>
+      <p>Share your answer. What did your partner say that you hadn't thought of?</p>
+    </div>
+    <div class="tps-card share">
+      <div class="tps-label">Step 3 — Share (5 min)</div>
+      <h4>Share with the class</h4>
+      <p>Volunteers share. What are the most important consequences of bad data?</p>
+    </div>
+  </div>
+
+  <textarea class="writing-field" style="margin-bottom:1.25rem" placeholder="Write your individual response here — think about: What could a researcher conclude from unreliable data? What real-world consequences could this have? Think back to Pavlov's story…"></textarea>
+
+  <div class="card">
+    <div class="card-title">✅ Final Self-Check</div>
+    <div class="card-sub">Before you leave — tick each one if you feel confident:</div>
+    <div class="sc-item"><div class="sc-check" onclick="tick(this)"></div>I can explain what makes data collection reliable, and give an example.</div>
+    <div class="sc-item"><div class="sc-check" onclick="tick(this)"></div>I can identify at least three types of data collection errors and why they are a problem.</div>
+    <div class="sc-item"><div class="sc-check" onclick="tick(this)"></div>I can describe how I would improve the mock experiment's data collection procedure.</div>
+    <div class="sc-item" style="margin-bottom:0"><div class="sc-check" onclick="tick(this)"></div>I understand how unreliable data can lead to wrong conclusions.</div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ── Nav ────────────────────────────────────────────────────────────────────
+const TABS = ['overview','hook','teach','experiment','reflect','exit'];
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('s-'+id).classList.add('active');
+  document.querySelectorAll('.nav-tab')[TABS.indexOf(id)].classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function tick(el){ el.classList.toggle('checked'); }
+
+// ── Phase pills ────────────────────────────────────────────────────────────
+const PHASE_MAP = ['overview','hook','teach','experiment','reflect','exit'];
+function setPhase(i){
+  document.querySelectorAll('.phase-pill').forEach((p,j)=>p.classList.toggle('active',j===i));
+  show(PHASE_MAP[i+1]||PHASE_MAP[i]);
+}
+
+// ── Lesson clock ──────────────────────────────────────────────────────────
+let lessonSecs = 70*60, lessonInterval;
+function startLessonClock(){
+  lessonInterval = setInterval(()=>{
+    if(lessonSecs<=0){clearInterval(lessonInterval);return;}
+    lessonSecs--;
+    const m=Math.floor(lessonSecs/60),s=lessonSecs%60;
+    document.getElementById('lesson-clock').textContent=`⏱ ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  },1000);
+}
+document.addEventListener('DOMContentLoaded', startLessonClock);
+
+// ── Activity timer ─────────────────────────────────────────────────────────
+let expSecs = 5*60, expRunning = false, expInterval;
+function renderExp(){
+  const m=Math.floor(expSecs/60),s=expSecs%60;
+  const el=document.getElementById('exp-timer');
+  if(!el)return;
+  el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  el.className='cd-display'+(expSecs<=10?' urgent':'');
+}
+function startExp(){ if(expRunning)return; expRunning=true; expInterval=setInterval(()=>{ if(expSecs<=0){clearInterval(expInterval);expRunning=false;return;} expSecs--; renderExp(); },1000); }
+function pauseExp(){ clearInterval(expInterval); expRunning=false; }
+function resetExp(){ clearInterval(expInterval); expRunning=false; expSecs=5*60; renderExp(); }
+function setExp(m,sec=false){ clearInterval(expInterval); expRunning=false; expSecs=sec?m:m*60; renderExp(); }
+
+// ── Error spotter ──────────────────────────────────────────────────────────
+const ERROR_ROWS = [
+  { id:1, label:"Participant 1 — Silence, 8 words", error:false, note:"" },
+  { id:2, label:"Participant 2 — Music, missing words recalled", error:true, why:"Missing data — a blank field means this participant cannot be included in any average calculation.", type:"missing" },
+  { id:3, label:"Participant 3 — Silence, 15 words recalled", error:false, note:"" },
+  { id:4, label:"Participant 4 — Music, 10 words (notes say 12)", error:true, why:"Conflicting data — the table says 10 but the notes say 12. Which is correct? This inconsistency makes the entry unreliable.", type:"conflict" },
+  { id:5, label:"Participant 5 — Silence, 12 words, handwriting note", error:true, why:"Inconsistent recording — the observation note flags handwriting issues, which means this entry may have been misread or recorded incorrectly.", type:"recording" },
+  { id:6, label:"Participant 6 — Music, 11 words, music too loud", error:true, why:"Controlled variable violated — the music being 'too loud' means this participant's condition was different from others in the music group, making their result incomparable.", type:"cv" },
+  { id:7, label:"Participant 7 — Silence, 7 words, not timed accurately", error:true, why:"Inconsistent procedure — if timing was inaccurate, the participant may have had more or less recall time than others, invalidating their result.", type:"timing" },
+];
+const selected = new Set();
+
+function renderErrors(){
+  document.getElementById('error-rows').innerHTML = ERROR_ROWS.map(r=>`
+    <div class="error-row-item" id="erow-${r.id}" onclick="toggleError(${r.id})">
+      <div class="err-num">${r.id}</div>
+      <div class="err-text">${r.label}</div>
+    </div>`).join('');
+}
+function toggleError(id){
+  const el=document.getElementById('erow-'+id);
+  if(selected.has(id)){ selected.delete(id); el.className='error-row-item'; }
+  else { selected.add(id); el.className='error-row-item selected'; }
+}
+function checkErrors(){
+  const errors = ERROR_ROWS.filter(r=>r.error).map(r=>r.id);
+  let correct=0, missed=0, falsePos=0;
+  ERROR_ROWS.forEach(r=>{
+    const el=document.getElementById('erow-'+r.id);
+    if(r.error && selected.has(r.id)){ el.className='error-row-item correct'; correct++; }
+    else if(r.error && !selected.has(r.id)){ el.className='error-row-item miss'; missed++; }
+    else if(!r.error && selected.has(r.id)){ el.className='error-row-item wrong'; falsePos++; }
+  });
+  const fb=document.getElementById('err-feedback');
+  if(correct===errors.length && falsePos===0){
+    fb.className='err-feedback show pass';
+    fb.innerHTML=`✓ Perfect! You found all ${errors.length} errors. ${ERROR_ROWS.filter(r=>r.error).map(r=>`<br><strong>Participant ${r.id}:</strong> ${r.why}`).join('')}`;
+  } else {
+    const score=correct-falsePos;
+    fb.className=`err-feedback show ${score>=3?'partial':'fail'}`;
+    fb.innerHTML=`You found ${correct} of ${errors.length} errors${falsePos>0?` (and flagged ${falsePos} that were fine)`:''}.<br>${ERROR_ROWS.filter(r=>r.error).map(r=>`<br><strong>Participant ${r.id}:</strong> ${r.why}`).join('')}`;
+  }
+}
+function resetErrors(){ selected.clear(); renderErrors(); document.getElementById('err-feedback').className='err-feedback'; }
+renderErrors();
+
+// ── Pavlov story toggle ───────────────────────────────────────────────────
+function toggleStory(header){
+  const body=header.nextElementSibling;
+  const arrow=header.querySelector('.story-arrow');
+  const open=body.classList.toggle('open');
+  arrow.classList.toggle('open',open);
+}
+
+// ── Match game ────────────────────────────────────────────────────────────
+const MATCH_ITEMS = [
+  { title:"Missing Data", desc:"A field is left blank — the participant's result cannot be used.", correct:true },
+  { title:"Conflicting Records", desc:"The data table shows one number but the notes say another.", correct:true },
+  { title:"Controlled Variable Violated", desc:"One participant's conditions were accidentally different from the others.", correct:true },
+  { title:"Researcher Bias", desc:"The researcher reacted differently to high and low scorers, giving subtle hints.", correct:true },
+  { title:"Thorough Debrief", desc:"Participants were fully informed of the study's purpose after it ended.", correct:false },
+  { title:"Consistent Word List", desc:"All participants received the same 10 words in the same order.", correct:false },
+];
+let matchSelected = new Set();
+
+function renderMatchGame(){
+  const el=document.querySelector('#s-teach .card:nth-child(3) #match-game') || document.getElementById('match-game-inner');
+  if(!el) return;
+  el.innerHTML=`<div style="font-size:13px;color:var(--muted);margin-bottom:10px">Select all items that represent a data collection <strong>error</strong>:</div>
+  <div class="error-match">
+    ${MATCH_ITEMS.map((m,i)=>`<div class="em-card" id="em-${i}" onclick="toggleMatch(${i})">
+      <div class="em-title">${m.title}</div>
+      <div class="em-desc">${m.desc}</div>
+    </div>`).join('')}
+  </div>
+  <button class="check-errors-btn" onclick="checkMatch()" style="margin-top:4px">Check answers</button>
+  <button class="reset-btn" onclick="resetMatch()">↺ Reset</button>
+  <div class="err-feedback" id="match-feedback" style="margin-top:10px"></div>`;
+}
+function toggleMatch(i){
+  const el=document.getElementById('em-'+i);
+  if(matchSelected.has(i)){ matchSelected.delete(i); el.className='em-card'; }
+  else { matchSelected.add(i); el.className='em-card selected'; }
+}
+function checkMatch(){
+  let c=0,w=0;
+  MATCH_ITEMS.forEach((m,i)=>{
+    const el=document.getElementById('em-'+i);
+    if(m.correct && matchSelected.has(i)){ el.className='em-card correct'; c++; }
+    else if(!m.correct && matchSelected.has(i)){ el.className='em-card wrong'; w++; }
+    else if(m.correct && !matchSelected.has(i)){ el.className='em-card'; }
+  });
+  const total=MATCH_ITEMS.filter(m=>m.correct).length;
+  const fb=document.getElementById('match-feedback');
+  fb.className=`err-feedback show ${c===total&&w===0?'pass':c>=2?'partial':'fail'}`;
+  fb.innerHTML=c===total&&w===0
+    ? `✓ Correct! You identified all four data collection errors and correctly left the good practices unselected.`
+    : `You selected ${c} of ${total} errors correctly${w>0?` and incorrectly flagged ${w} good practice${w>1?'s':''}`:''}. The last two items are examples of GOOD data collection — not errors.`;
+}
+function resetMatch(){ matchSelected.clear(); MATCH_ITEMS.forEach((_,i)=>{ const el=document.getElementById('em-'+i); if(el) el.className='em-card'; }); document.getElementById('match-feedback').className='err-feedback'; }
+
+// ── Data table ────────────────────────────────────────────────────────────
+function buildDataTable(){
+  const tbody=document.getElementById('data-rows');
+  if(!tbody)return;
+  tbody.innerHTML=[...Array(10)].map((_,i)=>`
+    <tr>
+      <td style="font-weight:600;color:var(--muted)">${i+1}</td>
+      <td><select style="width:100%;border:1px solid var(--border);border-radius:5px;padding:5px 6px;font-size:13px;background:var(--bg);color:var(--text);font-family:inherit" id="cond-${i}">
+        <option value="">— select —</option>
+        <option value="silence">Silence</option>
+        <option value="music">Music</option>
+      </select></td>
+      <td><input type="number" min="0" max="10" id="words-${i}" placeholder="0–10" style="width:80px"></td>
+      <td><input type="text" id="notes-${i}" placeholder="Factual observations only…"></td>
+    </tr>`).join('');
+}
+function calcAvgs(){
+  let silVals=[], musVals=[];
+  for(let i=0;i<10;i++){
+    const cond=document.getElementById('cond-'+i)?.value;
+    const val=parseFloat(document.getElementById('words-'+i)?.value);
+    if(!isNaN(val)){
+      if(cond==='silence') silVals.push(val);
+      if(cond==='music')   musVals.push(val);
+    }
+  }
+  const avg=arr=>arr.length?( arr.reduce((a,b)=>a+b,0)/arr.length ).toFixed(1):'—';
+  document.getElementById('avg-silence').textContent=avg(silVals);
+  document.getElementById('avg-music').textContent=avg(musVals);
+  document.getElementById('avg-silence-sub').textContent=silVals.length?`Based on ${silVals.length} participant${silVals.length>1?'s':''}` :'No silence data entered';
+  document.getElementById('avg-music-sub').textContent=musVals.length?`Based on ${musVals.length} participant${musVals.length>1?'s':''}` :'No music data entered';
+}
+
+// ── Sentence starters ─────────────────────────────────────────────────────
+function addStarter(chip){
+  const field=document.querySelector('#s-reflect .writing-field');
+  if(!field)return;
+  const text=chip.textContent.replace(/^"|"$/g,'');
+  field.value=(field.value.trim()?field.value.trim()+'\n\n':'')+text;
+  field.focus();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  buildDataTable();
+  // Inject match game into teach section
+  const card=document.querySelector('#s-teach .card:nth-child(3)');
+  if(card){
+    const div=document.createElement('div');
+    div.id='match-game';
+    card.appendChild(div);
+    renderMatchGame();
+  }
+});
+</script>
+</body>
+</html>
